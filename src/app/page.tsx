@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -12,6 +13,27 @@ export default function Home() {
           height={38}
           priority
         />
+        
+        {/* School CMS Demo Section */}
+        <div className="text-center sm:text-left mb-8">
+          <h1 className="text-2xl font-bold mb-4 text-gray-900">School CMS Demo</h1>
+          <p className="text-gray-600 mb-4">Testing Supabase integration with bilingual content.</p>
+          <div className="space-y-3 sm:space-y-0 sm:space-x-4 sm:flex">
+            <Link 
+              href="/about"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              View About Page
+            </Link>
+            <Link 
+              href="/admin"
+              className="inline-block bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition-colors font-medium"
+            >
+              Admin Dashboard
+            </Link>
+          </div>
+        </div>
+
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
