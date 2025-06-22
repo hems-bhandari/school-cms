@@ -80,7 +80,7 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="bg-gray-50 px-6 py-3">
                   <Link href="/admin/about">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                       Manage About
                     </Button>
                   </Link>
@@ -101,15 +101,15 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="bg-gray-50 px-6 py-3">
                   <Link href="/admin/stats">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                       Manage Stats
                     </Button>
                   </Link>
                 </div>
               </div>
 
-              {/* Teachers Module (Coming Soon) */}
-              <div className="bg-white overflow-hidden shadow rounded-lg opacity-50">
+              {/* Teachers Module */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-6">
                   <div className="flex items-center">
                     <div className="flex-1">
@@ -121,9 +121,11 @@ export default async function AdminDashboard() {
                   </div>
                 </div>
                 <div className="bg-gray-50 px-6 py-3">
-                  <Button variant="outline" size="sm" className="w-full" disabled>
-                    Coming Soon
-                  </Button>
+                  <Link href="/admin/teachers">
+                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Manage Teachers
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
