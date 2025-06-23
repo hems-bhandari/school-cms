@@ -15,9 +15,10 @@ export default async function AdminDashboard() {
   }
 
   // Get stats for the dashboard
-  const [aboutResult, statsResult] = await Promise.all([
+  const [aboutResult, statsResult, teachersResult] = await Promise.all([
     supabase.from('about').select('*').single(),
-    supabase.from('stats').select('*').order('display_order')
+    supabase.from('stats').select('*').order('display_order'),
+    supabase.from('teachers').select('*')
   ])
 
   return (
@@ -45,7 +46,7 @@ export default async function AdminDashboard() {
           {/* Quick Stats */}
           <div className="mb-8">
             <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white p-4 rounded-lg shadow">
                 <h3 className="font-medium text-gray-900">About Content</h3>
                 <p className="text-sm text-gray-600">
@@ -56,6 +57,12 @@ export default async function AdminDashboard() {
                 <h3 className="font-medium text-gray-900">Statistics</h3>
                 <p className="text-sm text-gray-600">
                   {statsResult.data?.length || 0} stats configured
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h3 className="font-medium text-gray-900">Teachers</h3>
+                <p className="text-sm text-gray-600">
+                  {teachersResult.data?.length || 0} teachers ({teachersResult.data?.filter(t => t.is_active).length || 0} active)
                 </p>
               </div>
             </div>

@@ -6,6 +6,7 @@ import { Database } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
+import ImageUpload from '@/components/ImageUpload'
 
 type Teacher = Database['public']['Tables']['teachers']['Row']
 type TeacherInsert = Database['public']['Tables']['teachers']['Insert']
@@ -24,26 +25,25 @@ export default function AdminTeachers() {
   
   const supabase = createClient()
 
-  // Load existing teachers
   useEffect(() => {
-    loadTeachers()
-  }, [])
+    const loadTeachers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('teachers')
+          .select('*')
+          .order('display_order')
 
-  const loadTeachers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('teachers')
-        .select('*')
-        .order('display_order')
-
-      if (error) throw error
-      setTeachers(data || [])
-    } catch (err: unknown) {
-      setError(`Failed to load teachers: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    } finally {
-      setLoading(false)
+        if (error) throw error
+        setTeachers(data || [])
+      } catch (err: unknown) {
+        setError(`Failed to load teachers: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+    
+    loadTeachers()
+  }, [supabase])
 
   const handleEdit = (teacher: Teacher) => {
     setEditingTeacher(teacher)
@@ -88,6 +88,7 @@ export default function AdminTeachers() {
         position_ne: editingTeacher.position_ne?.trim() || '',
         bio_en: editingTeacher.bio_en?.trim() || null,
         bio_ne: editingTeacher.bio_ne?.trim() || null,
+        photo_url: editingTeacher.photo_url || null,
         email: editingTeacher.email?.trim() || null,
         phone: editingTeacher.phone?.trim() || null,
         qualifications_en: editingTeacher.qualifications_en?.trim() || null,
@@ -245,6 +246,20 @@ export default function AdminTeachers() {
               </div>
               
               <div className="p-6">
+                {/* Photo Upload Section */}
+                <div className="mb-8">
+                  <h3 className="text-md font-medium text-gray-900 mb-4">Teacher Photo</h3>
+                  <div className="max-w-sm">
+                    <ImageUpload
+                      currentImageUrl={editingTeacher.photo_url}
+                      onImageUpload={(url) => setEditingTeacher({...editingTeacher, photo_url: url})}
+                      onImageRemove={() => setEditingTeacher({...editingTeacher, photo_url: null})}
+                      folder="teacher-photos"
+                      maxSizeMB={5}
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Basic Info */}
                   <div>
