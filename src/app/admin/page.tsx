@@ -32,12 +32,20 @@ interface TeacherData {
   is_active: boolean
 }
 
+interface NoticeData {
+  id: number
+  title_en: string
+  title_ne: string
+  is_published: boolean
+}
+
 export default function AdminDashboard() {
   const { t } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
   const [aboutData, setAboutData] = useState<AboutData | null>(null)
   const [statsData, setStatsData] = useState<StatsData[]>([])
   const [teachersData, setTeachersData] = useState<TeacherData[]>([])
+  const [noticesData, setNoticesData] = useState<NoticeData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -53,15 +61,17 @@ export default function AdminDashboard() {
       setUser(user)
       
       // Get stats for the dashboard
-      const [aboutResult, statsResult, teachersResult] = await Promise.all([
+      const [aboutResult, statsResult, teachersResult, noticesResult] = await Promise.all([
         supabase.from('about').select('*').single(),
         supabase.from('stats').select('*').order('display_order'),
-        supabase.from('teachers').select('*')
+        supabase.from('teachers').select('*'),
+        supabase.from('notices').select('id, title_en, title_ne, is_published')
       ])
       
       setAboutData(aboutResult.data)
       setStatsData(statsResult.data || [])
       setTeachersData(teachersResult.data || [])
+      setNoticesData(noticesResult.data || [])
       setLoading(false)
     }
 
@@ -116,7 +126,7 @@ export default function AdminDashboard() {
           {/* Quick Stats */}
           <div className="mb-8">
             <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-4 rounded-lg shadow">
                 <h3 className="font-medium text-gray-900">{t('admin.about')}</h3>
                 <p className="text-sm text-gray-600">
@@ -135,13 +145,19 @@ export default function AdminDashboard() {
                   {teachersData?.length || 0} teachers ({teachersData?.filter(t => t.is_active).length || 0} active)
                 </p>
               </div>
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h3 className="font-medium text-gray-900">Notices</h3>
+                <p className="text-sm text-gray-600">
+                  {noticesData?.length || 0} notices ({noticesData?.filter(n => n.is_published).length || 0} published)
+                </p>
+              </div>
             </div>
           </div>
 
           {/* CMS Modules */}
           <div>
             <h2 className="text-lg font-medium text-gray-900 mb-4">Content Management</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               
               {/* About Module */}
               <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -206,24 +222,28 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* More modules... */}
-              <div className="bg-white overflow-hidden shadow rounded-lg opacity-50">
+              {/* Notices Module */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-6">
                   <div className="flex items-center">
                     <div className="flex-1">
                       <h3 className="text-lg font-medium text-gray-900">Notices</h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        Manage school notices and announcements
+                        Manage school announcements and notices
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="bg-gray-50 px-6 py-3">
-                  <Button variant="outline" size="sm" className="w-full" disabled>
-                    Coming Soon
-                  </Button>
+                  <Link href="/admin/notices">
+                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Manage Notices
+                    </Button>
+                  </Link>
                 </div>
               </div>
+
+
 
             </div>
           </div>
