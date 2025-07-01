@@ -7,6 +7,7 @@ export type Locale = 'en' | 'ne'
 
 interface LanguageContextType {
   locale: Locale
+  language: Locale
   setLocale: (locale: Locale) => void
   t: (key: string) => string
 }
@@ -229,7 +230,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   }
 
   return (
-    <LanguageContext.Provider value={{ locale, setLocale, t }}>
+    <LanguageContext.Provider value={{ locale, language: locale, setLocale, t }}>
       {children}
     </LanguageContext.Provider>
   )
