@@ -46,6 +46,14 @@ interface CommitteeData {
   is_active: boolean
 }
 
+interface ActivityData {
+  id: number
+  title_en: string
+  title_ne: string
+  is_published: boolean
+  is_featured: boolean
+}
+
 export default function AdminDashboard() {
   const { t } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
@@ -54,6 +62,7 @@ export default function AdminDashboard() {
   const [teachersData, setTeachersData] = useState<TeacherData[]>([])
   const [noticesData, setNoticesData] = useState<NoticeData[]>([])
   const [committeeData, setCommitteeData] = useState<CommitteeData[]>([])
+  const [activitiesData, setActivitiesData] = useState<ActivityData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -69,12 +78,13 @@ export default function AdminDashboard() {
       setUser(user)
       
       // Get stats for the dashboard
-      const [aboutResult, statsResult, teachersResult, noticesResult, committeeResult] = await Promise.all([
+      const [aboutResult, statsResult, teachersResult, noticesResult, committeeResult, activitiesResult] = await Promise.all([
         supabase.from('about').select('*').single(),
         supabase.from('stats').select('*').order('display_order'),
         supabase.from('teachers').select('*'),
         supabase.from('notices').select('id, title_en, title_ne, is_published'),
-        supabase.from('committee').select('*')
+        supabase.from('committee').select('*'),
+        supabase.from('activities').select('id, title_en, title_ne, is_published, is_featured')
       ])
       
       setAboutData(aboutResult.data)
@@ -82,6 +92,7 @@ export default function AdminDashboard() {
       setTeachersData(teachersResult.data || [])
       setNoticesData(noticesResult.data || [])
       setCommitteeData(committeeResult.data || [])
+      setActivitiesData(activitiesResult.data || [])
       setLoading(false)
     }
 
@@ -136,7 +147,7 @@ export default function AdminDashboard() {
           {/* Quick Stats */}
           <div className="mb-8">
             <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               <div className="bg-white p-4 rounded-lg shadow">
                 <h3 className="font-medium text-gray-900">{t('admin.about')}</h3>
                 <p className="text-sm text-gray-600">
@@ -159,6 +170,12 @@ export default function AdminDashboard() {
                 <h3 className="font-medium text-gray-900">Committee</h3>
                 <p className="text-sm text-gray-600">
                   {committeeData?.length || 0} members ({committeeData?.filter(c => c.is_active).length || 0} active)
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h3 className="font-medium text-gray-900">Activities</h3>
+                <p className="text-sm text-gray-600">
+                  {activitiesData?.length || 0} activities ({activitiesData?.filter(a => a.is_published).length || 0} published)
                 </p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
@@ -254,6 +271,27 @@ export default function AdminDashboard() {
                   <Link href="/admin/committee">
                     <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                       Manage Committee
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Activities Module */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-6">
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-medium text-gray-900">Activities</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Manage school events and activities
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-6 py-3">
+                  <Link href="/admin/activities">
+                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Manage Activities
                     </Button>
                   </Link>
                 </div>

@@ -43,6 +43,12 @@ export function Navigation() {
                 {t('nav.committee')}
               </Link>
               <Link
+                href="/activities"
+                className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+              >
+                {t('nav.activities')}
+              </Link>
+              <Link
                 href="/notices"
                 className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
               >

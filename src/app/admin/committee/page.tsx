@@ -52,7 +52,6 @@ export default function AdminCommittee() {
     display_order: 0,
     is_active: true
   })
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -94,31 +93,10 @@ export default function AdminCommittee() {
 
     try {
       const supabase = createClient()
-      let finalPhotoUrl = photoUrl
-
-      // Upload photo if selected
-      if (photoFile) {
-        const fileExt = photoFile.name.split('.').pop()
-        const fileName = `${Date.now()}.${fileExt}`
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('committee-photos')
-          .upload(fileName, photoFile)
-
-        if (uploadError) {
-          throw uploadError
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('committee-photos')
-          .getPublicUrl(uploadData.path)
-        
-        finalPhotoUrl = publicUrl
-      }
-
+      
       const memberData = {
         ...formData,
-        photo_url: finalPhotoUrl
+        photo_url: photoUrl
       }
 
       if (editingMember) {
@@ -139,20 +117,7 @@ export default function AdminCommittee() {
       }
 
       // Reset form and refresh data
-      setFormData({
-        name_en: '',
-        name_ne: '',
-        role_en: '',
-        role_ne: '',
-        bio_en: '',
-        bio_ne: '',
-        display_order: 0,
-        is_active: true
-      })
-      setPhotoFile(null)
-      setPhotoUrl(null)
-      setShowForm(false)
-      setEditingMember(null)
+      resetForm()
       fetchCommittee()
     } catch (error) {
       console.error('Error saving committee member:', error)
@@ -207,7 +172,6 @@ export default function AdminCommittee() {
       display_order: 0,
       is_active: true
     })
-    setPhotoFile(null)
     setPhotoUrl(null)
     setShowForm(false)
     setEditingMember(null)
@@ -394,9 +358,11 @@ export default function AdminCommittee() {
                     Photo
                   </label>
                   <ImageUpload
-                    onFileSelected={setPhotoFile}
+                    onImageUpload={setPhotoUrl}
+                    onImageRemove={() => setPhotoUrl(null)}
                     currentImageUrl={photoUrl}
-                    bucketName="committee-photos"
+                    folder="committee-photos"
+                    maxSizeMB={5}
                   />
                 </div>
 
