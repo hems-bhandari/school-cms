@@ -318,7 +318,26 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-
+              {/* Footer Module */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-6">
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-medium text-gray-900">Footer</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Manage footer content and settings
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-6 py-3">
+                  <Link href="/admin/footer">
+                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Manage Footer
+                    </Button>
+                  </Link>
+                </div>
+              </div>
 
             </div>
           </div>
