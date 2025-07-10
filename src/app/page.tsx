@@ -1,14 +1,55 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from "next/link";
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
+import { createClient } from '@/lib/supabase-client'
+import { generateSchoolSchema } from '@/lib/seo'
+import SEOSchema from '@/components/SEOSchema'
+
+interface FooterData {
+  school_name_en: string
+  school_name_ne: string
+  address_en: string
+  address_ne: string
+  phone: string
+  email: string
+  logo_url?: string
+  facebook_url?: string
+  twitter_url?: string
+  instagram_url?: string
+  youtube_url?: string
+  linkedin_url?: string
+}
 
 export default function Home() {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
+  const [footerData, setFooterData] = useState<FooterData | null>(null)
+
+  useEffect(() => {
+    async function fetchSchoolData() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('footer')
+        .select('*')
+        .eq('is_active', true)
+        .single()
+      
+      if (data) {
+        setFooterData(data)
+      }
+    }
+    fetchSchoolData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* SEO Schema.org structured data */}
+      {footerData && (
+        <SEOSchema schema={generateSchoolSchema(footerData, locale)} />
+      )}
+      
       <Navigation />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

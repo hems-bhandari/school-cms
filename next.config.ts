@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Enable experimental features for better SEO and performance
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  // Enable static optimization
+  output: 'standalone',
+  // Compress responses
+  compress: true,
+  // Enable SWC minification
+  swcMinify: true,
 };
 
 export default nextConfig;
