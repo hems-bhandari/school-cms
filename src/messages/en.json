@@ -8,6 +8,12 @@
     "activities": "Activities",
     "admin": "Admin"
   },
+  "home": {
+    "title": "Welcome to Our School",
+    "subtitle": "Empowering minds, building futures through quality education and innovative learning experiences.",
+    "aboutStats": "About & Stats",
+    "admin": "Admin Portal"
+  },
   "about": {
     "title": "About Us",
     "loading": "Loading...",

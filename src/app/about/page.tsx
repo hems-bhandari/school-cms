@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
-import type { Metadata } from 'next'
-import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 
 interface StatsCardProps {
   label: string
@@ -40,17 +38,6 @@ interface StatsData {
   value: number
   display_order: number
 }
-
-export const metadata: Metadata = generateSEOMetadata({
-  title: "About Us - School Statistics & Information",
-  description: "Learn about our school's mission, vision, and key statistics including student enrollment, success rates, and achievements.",
-  keywords: ["about school", "school statistics", "education", "student enrollment", "academic achievement"],
-  url: "/about",
-  type: "website"
-})
-
-// Enable ISR with 1 hour revalidation
-export const revalidate = 3600
 
 export default function AboutStatsPage() {
   const { locale, t } = useLanguage()
