@@ -51,7 +51,17 @@ const translations = {
     
     // About Page
     'about.title': 'About Our School',
-    'about.stats.title': 'School Statistics',
+    'about.subtitle': 'Shaping Tomorrow\'s Leaders',
+    'about.mission': 'Our Mission',
+    'about.vision': 'Our Vision',
+    'about.values': 'Our Values',
+    'about.history': 'Our History',
+    'about.excellence': 'Excellence in Education',
+    'about.community': 'Building Community',
+    'about.innovation': 'Innovation & Growth',
+    'about.leadership': 'Leadership Development',
+    'about.stats.title': 'Our Achievements',
+    'about.stats.description': 'Numbers that reflect our commitment to excellence',
     'about.loading': 'Loading...',
     'about.error': 'Error loading content',
     
@@ -169,7 +179,17 @@ const translations = {
     
     // About Page
     'about.title': 'हाम्रो विद्यालयको बारेमा',
-    'about.stats.title': 'विद्यालयका तथ्याङ्कहरू',
+    'about.subtitle': 'भोलिका नेताहरूलाई आकार दिँदै',
+    'about.mission': 'हाम्रो मिशन',
+    'about.vision': 'हाम्रो दृष्टिकोण',
+    'about.values': 'हाम्रा मूल्यहरू',
+    'about.history': 'हाम्रो इतिहास',
+    'about.excellence': 'शिक्षामा उत्कृष्टता',
+    'about.community': 'समुदाय निर्माण',
+    'about.innovation': 'नवाचार र विकास',
+    'about.leadership': 'नेतृत्व विकास',
+    'about.stats.title': 'हाम्रा उपलब्धिहरू',
+    'about.stats.description': 'उत्कृष्टताप्रति हाम्रो प्रतिबद्धतालाई देखाउने संख्याहरू',
     'about.loading': 'लोड हुँदैछ...',
     'about.error': 'सामग्री लोड गर्न त्रुटि',
     

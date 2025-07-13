@@ -16,8 +16,21 @@
   },
   "about": {
     "title": "About Us",
+    "subtitle": "Shaping Tomorrow's Leaders",
+    "mission": "Our Mission",
+    "vision": "Our Vision",
+    "values": "Our Values",
+    "history": "Our History",
+    "excellence": "Excellence in Education",
+    "community": "Building Community",
+    "innovation": "Innovation & Growth",
+    "leadership": "Leadership Development",
     "loading": "Loading...",
-    "error": "Error loading content"
+    "error": "Error loading content",
+    "stats": {
+      "title": "Our Achievements",
+      "description": "Numbers that reflect our commitment to excellence"
+    }
   },
   "stats": {
     "title": "School Statistics",
