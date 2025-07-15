@@ -106,7 +106,7 @@ export default function AdminLogin() {
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Demo credentials will be created when you first access the system</p>
+            <p>Please contact school administrator if you forgot your credentials.</p>
           </div>
         </div>
       </div>

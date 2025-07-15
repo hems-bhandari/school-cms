@@ -7,6 +7,22 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
+import { 
+  LayoutDashboard,
+  FileText,
+  BarChart3,
+  Users,
+  Calendar,
+  Megaphone,
+  Settings,
+  LogOut,
+  ChevronRight,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Globe,
+  Building
+} from 'lucide-react'
 
 interface AboutData {
   id: number
@@ -107,11 +123,12 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <p className="text-gray-600">{t('common.loading')}</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">{t('common.loading')}</p>
           </div>
         </div>
       </div>
@@ -123,226 +140,310 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
       
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{t('admin.title')}</h1>
-              <p className="text-gray-600">{t('admin.welcome')}, {user.email}</p>
-            </div>
-            <Button variant="outline" onClick={handleSignOut}>
-              {t('admin.signOut')}
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Quick Stats */}
-          <div className="mb-8">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-medium text-gray-900">{t('admin.about')}</h3>
-                <p className="text-sm text-gray-600">
-                  {aboutData ? 'Configured' : 'Not set'}
-                </p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-medium text-gray-900">{t('admin.stats')}</h3>
-                <p className="text-sm text-gray-600">
-                  {statsData?.length || 0} stats configured
-                </p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-medium text-gray-900">{t('admin.teachers')}</h3>
-                <p className="text-sm text-gray-600">
-                  {teachersData?.length || 0} teachers ({teachersData?.filter(t => t.is_active).length || 0} active)
-                </p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-medium text-gray-900">Committee</h3>
-                <p className="text-sm text-gray-600">
-                  {committeeData?.length || 0} members ({committeeData?.filter(c => c.is_active).length || 0} active)
-                </p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-medium text-gray-900">Activities</h3>
-                <p className="text-sm text-gray-600">
-                  {activitiesData?.length || 0} activities ({activitiesData?.filter(a => a.is_published).length || 0} published)
-                </p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-medium text-gray-900">Notices</h3>
-                <p className="text-sm text-gray-600">
-                  {noticesData?.length || 0} notices ({noticesData?.filter(n => n.is_published).length || 0} published)
-                </p>
+      {/* Hero Header */}
+      <section className="relative overflow-hidden py-16 lg:py-24">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <LayoutDashboard className="text-white" size={32} />
               </div>
             </div>
-          </div>
-
-          {/* CMS Modules */}
-          <div>
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Content Management</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              
-              {/* About Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{t('admin.about')}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {t('admin.aboutDesc')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/about">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage About
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Stats Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{t('admin.stats')}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {t('admin.statsDesc')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/stats">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage Stats
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Teachers Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{t('admin.teachers')}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {t('admin.teachersDesc')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/teachers">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage Teachers
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Committee Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">Committee</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Manage management committee members
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/committee">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage Committee
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Activities Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">Activities</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Manage school events and activities
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/activities">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage Activities
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Notices Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">Notices</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Manage school announcements and notices
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/notices">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage Notices
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Footer Module */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">Footer</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Manage footer content and settings
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gray-50 px-6 py-3">
-                  <Link href="/admin/footer">
-                    <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      Manage Footer
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fadeInUp">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {t('admin.title')}
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 mb-6 animate-fadeInUp" style={{ animationDelay: '200ms' }}>
+              {t('admin.welcome')}, <span className="font-semibold">{user.email}</span>
+            </p>
+            <div className="flex justify-center animate-fadeInUp" style={{ animationDelay: '400ms' }}>
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut}
+                className="bg-white/80 backdrop-blur-sm border-white/20 hover:bg-white/90 shadow-lg"
+              >
+                <LogOut size={16} className="mr-2" />
+                {t('admin.signOut')}
+              </Button>
             </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        {/* Quick Stats Overview */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">System Overview</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* About Status */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <Info className="text-white" size={24} />
+                </div>
+                {aboutData ? (
+                  <CheckCircle className="text-green-500" size={20} />
+                ) : (
+                  <AlertCircle className="text-amber-500" size={20} />
+                )}
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">{t('admin.about')}</h3>
+              <p className="text-sm text-gray-600">
+                {aboutData ? 'Content configured' : 'Not configured'}
+              </p>
+            </div>
+
+            {/* Stats Count */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="text-white" size={24} />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{statsData?.length || 0}</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">{t('admin.stats')}</h3>
+              <p className="text-sm text-gray-600">Statistics configured</p>
+            </div>
+
+            {/* Teachers Count */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Users className="text-white" size={24} />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{teachersData?.filter(t => t.is_active).length || 0}</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">{t('admin.teachers')}</h3>
+              <p className="text-sm text-gray-600">
+                {teachersData?.filter(t => t.is_active).length || 0} active of {teachersData?.length || 0} total
+              </p>
+            </div>
+
+            {/* Committee Count */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <Building className="text-white" size={24} />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{committeeData?.filter(c => c.is_active).length || 0}</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">Committee</h3>
+              <p className="text-sm text-gray-600">
+                {committeeData?.filter(c => c.is_active).length || 0} active members
+              </p>
+            </div>
+
+            {/* Activities Count */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <Calendar className="text-white" size={24} />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{activitiesData?.filter(a => a.is_published).length || 0}</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">Activities</h3>
+              <p className="text-sm text-gray-600">
+                {activitiesData?.filter(a => a.is_published).length || 0} published activities
+              </p>
+            </div>
+
+            {/* Notices Count */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                  <Megaphone className="text-white" size={24} />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{noticesData?.filter(n => n.is_published).length || 0}</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">Notices</h3>
+              <p className="text-sm text-gray-600">
+                {noticesData?.filter(n => n.is_published).length || 0} published notices
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* CMS Modules */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Content Management</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+            {/* About Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('admin.about')}</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  {t('admin.aboutDesc')}
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/about" className="block">
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg">
+                    Manage About
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Stats Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('admin.stats')}</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  {t('admin.statsDesc')}
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/stats" className="block">
+                  <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white shadow-lg">
+                    Manage Stats
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Teachers Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Users className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('admin.teachers')}</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  {t('admin.teachersDesc')}
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/teachers" className="block">
+                  <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg">
+                    Manage Teachers
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Committee Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Building className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Committee</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Manage management committee members
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/committee" className="block">
+                  <Button className="w-full bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-700 hover:to-orange-800 text-white shadow-lg">
+                    Manage Committee
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Activities Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Activities</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Manage school events and activities
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/activities" className="block">
+                  <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white shadow-lg">
+                    Manage Activities
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Notices Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Megaphone className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Notices</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Manage school announcements and notices
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/notices" className="block">
+                  <Button className="w-full bg-gradient-to-r from-red-600 to-pink-700 hover:from-red-700 hover:to-pink-800 text-white shadow-lg">
+                    Manage Notices
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Footer Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-gray-500 to-slate-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Settings className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Footer</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Manage footer content and settings
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/footer" className="block">
+                  <Button className="w-full bg-gradient-to-r from-gray-600 to-slate-700 hover:from-gray-700 hover:to-slate-800 text-white shadow-lg">
+                    Manage Footer
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Website Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Globe className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">View Website</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Visit the public website
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/" className="block">
+                  <Button className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white shadow-lg">
+                    View Website
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
