@@ -155,7 +155,7 @@ export default function AdminDashboard() {
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fadeInUp">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {t('admin.title')}
+                JJSS Admin Dashboard
               </span>
             </h1>
             <p className="text-xl text-gray-600 mb-6 animate-fadeInUp" style={{ animationDelay: '200ms' }}>

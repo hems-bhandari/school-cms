@@ -34,13 +34,18 @@ export function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2 group">
+            <Link href="/" className="flex items-center space-x-3 group">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-200">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                School CMS
-              </span>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  JJSS
+                </span>
+                <span className="text-xs text-gray-500 hidden lg:block">
+                  Jana Jagriti Secondary School
+                </span>
+              </div>
             </Link>
           </div>
 

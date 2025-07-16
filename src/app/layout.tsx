@@ -16,19 +16,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "School CMS - Modern Bilingual School Management System",
-  description: "A comprehensive bilingual school management system featuring notices, activities, teacher profiles, and committee information. Built with Next.js and Supabase.",
+  title: "Shree Jana Jagriti Secondary School - JJSS",
+  description: "Welcome to Shree Jana Jagriti Secondary School located in Omsatiya-1, Rupandehi, Lumbini, Nepal. A comprehensive bilingual school featuring quality education, notices, activities, teacher profiles, and committee information.",
   keywords: [
-    "school management system",
+    "Shree Jana Jagriti Secondary School",
+    "JJSS",
+    "Jana Jagriti",
+    "school",
     "education",
-    "bilingual",
+    "Omsatiya",
+    "Rupandehi",
+    "Lumbini",
+    "Nepal",
+    "secondary school",
+    "bilingual education",
     "notices",
     "activities",
     "teachers",
-    "committee",
-    "Nepal",
-    "English",
-    "Nepali"
+    "committee"
   ],
   url: "/",
   type: "website"

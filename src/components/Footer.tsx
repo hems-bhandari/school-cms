@@ -180,7 +180,15 @@ export default function Footer() {
             </p>
             <div className="mt-4 md:mt-0">
               <p className="text-gray-400 text-xs">
-                Powered by School CMS
+                Made with ❤️ by{' '}
+                <a 
+                  href="#" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                >
+                  Hems
+                </a>
               </p>
             </div>
           </div>

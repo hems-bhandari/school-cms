@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "About Us - School Statistics & Information",
-  description: "Learn about our school's mission, vision, and key statistics including student enrollment, success rates, and achievements.",
-  keywords: ["about school", "school statistics", "education", "student enrollment", "academic achievement"],
+  title: "About Us - Shree Jana Jagriti Secondary School (JJSS)",
+  description: "Learn about Shree Jana Jagriti Secondary School's mission, vision, and key statistics. Located in Omsatiya-1, Rupandehi, Lumbini, Nepal. Quality education and student achievements.",
+  keywords: ["Shree Jana Jagriti Secondary School", "JJSS", "about school", "school statistics", "Omsatiya", "Rupandehi", "Lumbini", "Nepal", "education", "student enrollment", "academic achievement"],
   url: "/about",
   type: "website"
 })

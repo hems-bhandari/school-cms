@@ -18,7 +18,7 @@ import {
   TrendingUp,
   Heart,
   ArrowRight,
-  Sparkles,
+  MapPin,
   ChevronDown
 } from 'lucide-react'
 
@@ -38,7 +38,7 @@ interface FooterData {
 }
 
 export default function Home() {
-  const { t, locale } = useLanguage()
+  const { locale } = useLanguage()
   const [footerData, setFooterData] = useState<FooterData | null>(null)
   const [stats, setStats] = useState({
     students: 1200,
@@ -103,27 +103,23 @@ export default function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            {/* Hero Badge */}
-            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-8 shadow-lg">
-              <Sparkles className="w-5 h-5 text-yellow-500" />
-              <span className="text-sm font-medium text-gray-700">Modern School Management System</span>
-              <Sparkles className="w-5 h-5 text-yellow-500" />
-            </div>
-
             {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {t('home.title')}
+                Shree Jana Jagriti Secondary School
               </span>
-              <br />
-              <span className="text-3xl md:text-4xl font-medium text-gray-700">
-                Excellence in Education
-              </span>
+
             </h1>
+            
+            {/* Location */}
+            <div className="flex items-center justify-center space-x-2 mb-6">
+              <MapPin className="w-5 h-5 text-gray-500" />
+              <span className="text-lg text-gray-600">Omsatiya-1, Rupandehi, Lumbini, Nepal</span>
+            </div>
             
             {/* Subtitle */}
             <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-              {t('home.subtitle')} Discover our modern approach to education with cutting-edge technology and dedicated faculty.
+              Empowering minds, building futures. Discover our commitment to excellence in education with modern facilities and dedicated faculty.
             </p>
             
             {/* CTA Buttons */}
