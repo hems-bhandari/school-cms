@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
-import { 
+import {
   LayoutDashboard,
   FileText,
   BarChart3,
@@ -21,7 +21,8 @@ import {
   AlertCircle,
   Info,
   Globe,
-  Building
+  Building,
+  FolderOpen
 } from 'lucide-react'
 
 interface AboutData {
@@ -85,14 +86,14 @@ export default function AdminDashboard() {
     async function checkUser() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (!user) {
         window.location.href = '/admin/login'
         return
       }
-      
+
       setUser(user)
-      
+
       // Get stats for the dashboard
       const [aboutResult, statsResult, teachersResult, noticesResult, committeeResult, activitiesResult] = await Promise.all([
         supabase.from('about').select('*').single(),
@@ -102,7 +103,7 @@ export default function AdminDashboard() {
         supabase.from('committee').select('*'),
         supabase.from('activities').select('id, title_en, title_ne, is_published, is_featured')
       ])
-      
+
       setAboutData(aboutResult.data)
       setStatsData(statsResult.data || [])
       setTeachersData(teachersResult.data || [])
@@ -142,7 +143,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       {/* Hero Header */}
       <section className="relative overflow-hidden py-16 lg:py-24">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
@@ -162,8 +163,8 @@ export default function AdminDashboard() {
               {t('admin.welcome')}, <span className="font-semibold">{user.email}</span>
             </p>
             <div className="flex justify-center animate-fadeInUp" style={{ animationDelay: '400ms' }}>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleSignOut}
                 className="bg-white/80 backdrop-blur-sm border-white/20 hover:bg-white/90 shadow-lg"
               >
@@ -272,7 +273,7 @@ export default function AdminDashboard() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Content Management</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            
+
             {/* About Module */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
               <div className="p-6">
@@ -414,6 +415,27 @@ export default function AdminDashboard() {
                 <Link href="/admin/footer" className="block">
                   <Button className="w-full bg-gradient-to-r from-gray-600 to-slate-700 hover:from-gray-700 hover:to-slate-800 text-white shadow-lg">
                     Manage Footer
+                    <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Documents Module */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <FolderOpen className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Documents</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Upload and manage school documents and resources
+                </p>
+              </div>
+              <div className="px-6 pb-6">
+                <Link href="/admin/documents" className="block">
+                  <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white shadow-lg">
+                    Manage Documents
                     <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </Button>
                 </Link>

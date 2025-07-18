@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSwitcher } from './LanguageSwitcher'
-import { Menu, X, GraduationCap, Users, Calendar, Bell, User, Home, Info } from 'lucide-react'
+import { Menu, X, GraduationCap, Users, Calendar, Bell, User, Home, Info, FileText } from 'lucide-react'
 
 export function Navigation() {
   const { t } = useLanguage()
@@ -19,6 +19,7 @@ export function Navigation() {
     { href: '/committee', label: t('nav.committee'), icon: User },
     { href: '/activities', label: t('nav.activities'), icon: Calendar },
     { href: '/notices', label: t('nav.notices'), icon: Bell },
+    { href: '/documents', label: t('nav.documents'), icon: FileText },
   ]
 
   const isActive = (href: string) => {
