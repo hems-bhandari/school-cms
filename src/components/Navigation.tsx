@@ -121,14 +121,14 @@ export function Navigation() {
               })}
               
               {/* Mobile Admin Link */}
-              <Link
+              {/* <Link
                 href="/admin"
                 onClick={() => setIsMenuOpen(false)}
                 className="flex items-center space-x-3 px-3 py-2 bg-gray-800 text-white rounded-lg font-medium text-base hover:bg-gray-900 transition-colors duration-200"
               >
                 <User className="w-5 h-5" />
                 <span>{t('nav.admin')}</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
         )}
