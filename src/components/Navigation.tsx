@@ -71,12 +71,12 @@ export function Navigation() {
             })}
             
             {/* Admin Link */}
-            <Link
+            {/* <Link
               href="/admin"
               className="ml-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white px-4 py-2 rounded-lg font-medium text-sm hover:from-gray-900 hover:to-black transition-all duration-200 shadow-md hover:shadow-lg"
             >
               {t('nav.admin')}
-            </Link>
+            </Link> */}
           </div>
 
           {/* Language Switcher & Mobile Menu Button */}

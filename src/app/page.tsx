@@ -129,17 +129,17 @@ export default function Home() {
                 className="group bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl hover:from-blue-700 hover:to-indigo-700 font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center space-x-2"
               >
                 <BookOpen className="w-5 h-5" />
-                <span>Explore Our School</span>
+                <span>Explore</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
               </Link>
               
-              <Link 
+              {/* <Link 
                 href="/admin"
                 className="group bg-white text-gray-900 px-8 py-4 rounded-2xl hover:bg-gray-50 font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center space-x-2 border-2 border-gray-200 hover:border-gray-300"
               >
                 <GraduationCap className="w-5 h-5" />
                 <span>Admin Portal</span>
-              </Link>
+              </Link> */}
             </div>
 
             {/* Stats Section */}
@@ -190,7 +190,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Discover Our 
+              Explore 
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Features</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -244,20 +244,20 @@ export default function Home() {
               gradient="from-pink-500 to-pink-600"
             />
             
-            <FeatureCard
+            {/* <FeatureCard
               icon={<TrendingUp className="w-8 h-8 text-white" />}
               title="Admin Dashboard"
               description="Comprehensive management tools for administrators to efficiently manage school operations."
               href="/admin"
               buttonText="Access Dashboard"
               gradient="from-gray-600 to-gray-700"
-            />
+            /> */}
           </div>
         </div>
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
+      {/* <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Get Started?
@@ -280,7 +280,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
