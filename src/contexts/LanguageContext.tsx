@@ -28,6 +28,7 @@ const translations = {
     'nav.committee': 'Committee',
     'nav.notices': 'Notices',
     'nav.activities': 'Activities',
+    'nav.documents': 'Documents',
     'nav.admin': 'Admin',
     'nav.language': 'Language',
     
@@ -156,6 +157,7 @@ const translations = {
     'nav.committee': 'व्यवस्थापन समिति',
     'nav.notices': 'सूचनाहरू',
     'nav.activities': 'गतिविधिहरू',
+    'nav.documents': 'कागजातहरू',
     'nav.admin': 'एडमिन',
     'nav.language': 'भाषा',
     
