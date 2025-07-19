@@ -15,7 +15,6 @@ import {
   Bell, 
   BookOpen, 
   Award,
-  TrendingUp,
   Heart,
   ArrowRight,
   MapPin,
@@ -93,32 +92,45 @@ export default function Home() {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center overflow-hidden">
-        {/* Animated background elements */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/images/school_image.jpeg)',
+          }}
+        >
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-white/75 backdrop-blur-[1px]"></div>
+          
+          {/* Gradient overlay for additional elegance */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 via-indigo-900/5 to-purple-900/10"></div>
+        </div>
+
+        {/* Subtle animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-          <div className="absolute -bottom-10 -left-10 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" style={{ animationDelay: '4s' }}></div>
+          <div className="absolute -top-10 -right-10 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
+          <div className="absolute -bottom-10 -left-10 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style={{ animationDelay: '4s' }}></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             {/* Main Heading */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 bg-clip-text text-transparent drop-shadow-sm">
                 Shree Jana Jagriti Secondary School
               </span>
-
             </h1>
             
             {/* Location */}
             <div className="flex items-center justify-center space-x-2 mb-6">
-              <MapPin className="w-5 h-5 text-gray-500" />
-              <span className="text-lg text-gray-600">Omsatiya-3, Karuwani, Rupandehi, Lumbini, Nepal</span>
+              <MapPin className="w-5 h-5 text-gray-600 drop-shadow-sm" />
+              <span className="text-lg text-gray-700 font-medium drop-shadow-sm">Omsatiya-3, Karuwani, Rupandehi, Lumbini, Nepal</span>
             </div>
             
             {/* Subtitle */}
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed font-medium drop-shadow-sm">
               Empowering minds, building futures. Discover our commitment to excellence in education with modern facilities and dedicated faculty.
             </p>
             
@@ -193,9 +205,9 @@ export default function Home() {
               Explore 
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Features</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {/* <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Explore our comprehensive school management system designed for modern education
-            </p>
+            </p> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
