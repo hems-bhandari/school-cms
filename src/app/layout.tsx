@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Shree Jana Jagriti Secondary School - JJSS",
-  description: "Welcome to Shree Jana Jagriti Secondary School located in Omsatiya-1, Rupandehi, Lumbini, Nepal. A comprehensive bilingual school featuring quality education, notices, activities, teacher profiles, and committee information.",
+  description: "Welcome to Shree Jana Jagriti Secondary School located in Omsatiya-3, Karuwani Rupandehi, Lumbini, Nepal. A school featuring quality education, notices, activities, teacher profiles, and committee information.",
   keywords: [
     "Shree Jana Jagriti Secondary School",
     "JJSS",

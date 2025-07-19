@@ -114,7 +114,7 @@ export default function Home() {
             {/* Location */}
             <div className="flex items-center justify-center space-x-2 mb-6">
               <MapPin className="w-5 h-5 text-gray-500" />
-              <span className="text-lg text-gray-600">Omsatiya-1, Rupandehi, Lumbini, Nepal</span>
+              <span className="text-lg text-gray-600">Omsatiya-3, Karuwani, Rupandehi, Lumbini, Nepal</span>
             </div>
             
             {/* Subtitle */}
