@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Footer from "@/components/Footer";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
           </div>
         </LanguageProvider>
       </body>
+      <SpeedInsights/>
       <Analytics />
     </html>
   );
