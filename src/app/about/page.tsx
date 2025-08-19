@@ -112,16 +112,19 @@ export default function AboutPage() {
   const [statsData, setStatsData] = useState<StatsData[]>([])
   const [aboutError, setAboutError] = useState<string | null>(null)
   const [statsError, setStatsError] = useState<string | null>(null)
+  const [studentCounts, setStudentCounts] = useState<Array<{ id: number; level: string; boys: number; girls: number }>>([])
+  const [studentCountsError, setStudentCountsError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true)
       
-      // Fetch both about and stats data
-      const [aboutResult, statsResult] = await Promise.all([
+      // Fetch about, stats, and student counts data
+      const [aboutResult, statsResult, countsResult] = await Promise.all([
         supabase.from('about').select('*').single(),
-        supabase.from('stats').select('*').order('display_order')
+        supabase.from('stats').select('*').order('display_order'),
+        supabase.from('student_counts').select('id, level, boys, girls').order('display_order')
       ])
 
       const { data: about, error: aboutErr } = aboutResult
@@ -129,8 +132,10 @@ export default function AboutPage() {
 
       setAboutData(about)
       setStatsData(stats || [])
+      setStudentCounts(countsResult.data || [])
       setAboutError(aboutErr?.message || null)
       setStatsError(statsErr?.message || null)
+      setStudentCountsError(countsResult.error?.message || null)
       setLoading(false)
     }
 
@@ -259,6 +264,71 @@ export default function AboutPage() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* Data Section: Student Counts */}
+        <section className="mb-20">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Data
+            </h2>
+            <p className="text-gray-600">Number of students</p>
+          </div>
+
+          {studentCountsError && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded text-center">
+              {studentCountsError}
+            </div>
+          )}
+
+          <div className="overflow-x-auto bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50/70">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Level
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Boys
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Girls
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white/60 divide-y divide-gray-100">
+                {studentCounts.map((row) => {
+                  const total = (row?.boys || 0) + (row?.girls || 0)
+                  return (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {row.level}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                        {row.boys}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                        {row.girls}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
+                        {total}
+                      </td>
+                    </tr>
+                  )
+                })}
+                {studentCounts.length === 0 && (
+                  <tr>
+                    <td className="px-6 py-6 text-center text-sm text-gray-500" colSpan={4}>
+                      No data available yet
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         {/* Excellence Features */}

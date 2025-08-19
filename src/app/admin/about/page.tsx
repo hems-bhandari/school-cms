@@ -14,6 +14,14 @@ interface AboutData {
   updated_at: string
 }
 
+interface StudentCountRow {
+  id?: number
+  level: string
+  boys: number
+  girls: number
+  display_order?: number
+}
+
 export default function AdminAbout() {
   const [aboutData, setAboutData] = useState<AboutData | null>(null)
   const [contentEn, setContentEn] = useState('')
@@ -22,6 +30,8 @@ export default function AdminAbout() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [studentCounts, setStudentCounts] = useState<StudentCountRow[]>([])
+  const [countsLoading, setCountsLoading] = useState(true)
   
   const router = useRouter()
   const supabase = createClient()
@@ -29,6 +39,7 @@ export default function AdminAbout() {
   // Load existing content
   useEffect(() => {
     loadAboutContent()
+    loadStudentCounts()
   }, [])
 
   const loadAboutContent = async () => {
@@ -51,6 +62,23 @@ export default function AdminAbout() {
       setError(`Failed to load content: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadStudentCounts = async () => {
+    try {
+      setCountsLoading(true)
+      const { data, error } = await supabase
+        .from('student_counts')
+        .select('*')
+        .order('display_order')
+
+      if (error) throw error
+      setStudentCounts((data || []).map((d) => ({ id: d.id, level: d.level, boys: d.boys, girls: d.girls, display_order: d.display_order })))
+    } catch (err: unknown) {
+      setError(`Failed to load student counts: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setCountsLoading(false)
     }
   }
 
@@ -97,6 +125,63 @@ export default function AdminAbout() {
       
     } catch (err: unknown) {
       setError(`Failed to save: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const addEmptyRow = () => {
+    setStudentCounts((rows) => [
+      ...rows,
+      { level: '', boys: 0, girls: 0, display_order: (rows[rows.length-1]?.display_order || 0) + 1 }
+    ])
+  }
+
+  const updateRow = (index: number, changes: Partial<StudentCountRow>) => {
+    setStudentCounts((rows) => rows.map((r, i) => i === index ? { ...r, ...changes } : r))
+  }
+
+  const deleteRow = async (index: number) => {
+    const row = studentCounts[index]
+    if (row?.id) {
+      const { error } = await supabase.from('student_counts').delete().eq('id', row.id)
+      if (error) {
+        setError(`Failed to delete row: ${error.message}`)
+        return
+      }
+    }
+    setStudentCounts((rows) => rows.filter((_, i) => i !== index))
+  }
+
+  const saveStudentCounts = async () => {
+    setSaving(true)
+    setError('')
+    setSuccess('')
+    try {
+      // Split into updates and inserts
+      const updates = studentCounts.filter((r) => r.id)
+      const inserts = studentCounts.filter((r) => !r.id)
+
+      if (updates.length > 0) {
+        const { error } = await supabase.from('student_counts').upsert(
+          updates.map((r) => ({ id: r.id, level: r.level, boys: r.boys, girls: r.girls, display_order: r.display_order })),
+          { onConflict: 'id' }
+        )
+        if (error) throw error
+      }
+
+      if (inserts.length > 0) {
+        const { error } = await supabase.from('student_counts').insert(
+          inserts.map((r) => ({ level: r.level, boys: r.boys, girls: r.girls, display_order: r.display_order }))
+        )
+        if (error) throw error
+      }
+
+      await loadStudentCounts()
+      setSuccess('Student counts saved successfully!')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err: unknown) {
+      setError(`Failed to save student counts: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setSaving(false)
     }
@@ -234,6 +319,94 @@ export default function AdminAbout() {
             </div>
           </div>
 
+          {/* Student Counts Editor */}
+          <div className="mt-8 bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">Students Data</h2>
+                <p className="text-sm text-gray-500">Level-wise number of students</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={addEmptyRow}>Add Row</Button>
+                <Button onClick={saveStudentCounts} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+                  {saving ? 'Saving...' : 'Save Data'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Boys</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Girls</th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th className="px-4 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {countsLoading ? (
+                    <tr>
+                      <td className="px-4 py-6 text-center text-sm text-gray-500" colSpan={6}>Loading...</td>
+                    </tr>
+                  ) : studentCounts.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-6 text-center text-sm text-gray-500" colSpan={6}>No rows yet. Click Add Row.</td>
+                    </tr>
+                  ) : (
+                    studentCounts.map((row, index) => {
+                      const total = (row.boys || 0) + (row.girls || 0)
+                      return (
+                        <tr key={row.id ?? `new-${index}`}> 
+                          <td className="px-4 py-2">
+                            <input
+                              type="number"
+                              className="w-20 px-2 py-1 border rounded"
+                              value={row.display_order ?? index + 1}
+                              onChange={(e) => updateRow(index, { display_order: Number(e.target.value) })}
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="text"
+                              className="w-56 px-2 py-1 border rounded"
+                              placeholder="e.g., Primary"
+                              value={row.level}
+                              onChange={(e) => updateRow(index, { level: e.target.value })}
+                            />
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            <input
+                              type="number"
+                              className="w-24 px-2 py-1 border rounded text-right"
+                              min={0}
+                              value={row.boys}
+                              onChange={(e) => updateRow(index, { boys: Number(e.target.value) })}
+                            />
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            <input
+                              type="number"
+                              className="w-24 px-2 py-1 border rounded text-right"
+                              min={0}
+                              value={row.girls}
+                              onChange={(e) => updateRow(index, { girls: Number(e.target.value) })}
+                            />
+                          </td>
+                          <td className="px-4 py-2 text-right font-semibold">{total}</td>
+                          <td className="px-4 py-2 text-right">
+                            <Button variant="outline" onClick={() => deleteRow(index)}>Delete</Button>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
           {/* Content Preview */}
           <div className="mt-8 bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
