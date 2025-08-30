@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import ImageUpload from '@/components/ImageUpload'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Image from 'next/image'
+import { Building, Users2, Settings, Edit3 } from 'lucide-react'
 
 interface Committee {
   id: number
@@ -20,8 +21,19 @@ interface Committee {
   bio_ne: string | null
   display_order: number
   is_active: boolean
+  committee_type: string
   created_at: string
   updated_at: string
+}
+
+interface CommitteeContent {
+  id: number
+  committee_type: string
+  title_en: string
+  title_ne: string
+  description_en: string | null
+  description_ne: string | null
+  is_active: boolean
 }
 
 interface CommitteeFormData {
@@ -33,15 +45,28 @@ interface CommitteeFormData {
   bio_ne: string
   display_order: number
   is_active: boolean
+  committee_type: string
+}
+
+interface ContentFormData {
+  title_en: string
+  title_ne: string
+  description_en: string
+  description_ne: string
+  is_active: boolean
 }
 
 export default function AdminCommittee() {
   const { t } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
   const [committee, setCommittee] = useState<Committee[]>([])
+  const [committeeContent, setCommitteeContent] = useState<CommitteeContent[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [showContentForm, setShowContentForm] = useState(false)
   const [editingMember, setEditingMember] = useState<Committee | null>(null)
+  const [editingContent, setEditingContent] = useState<CommitteeContent | null>(null)
+  const [activeTab, setActiveTab] = useState<'SMC' | 'PTA'>('SMC')
   const [formData, setFormData] = useState<CommitteeFormData>({
     name_en: '',
     name_ne: '',
@@ -50,6 +75,14 @@ export default function AdminCommittee() {
     bio_en: '',
     bio_ne: '',
     display_order: 0,
+    is_active: true,
+    committee_type: 'SMC'
+  })
+  const [contentFormData, setContentFormData] = useState<ContentFormData>({
+    title_en: '',
+    title_ne: '',
+    description_en: '',
+    description_ne: '',
     is_active: true
   })
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
@@ -66,24 +99,36 @@ export default function AdminCommittee() {
       }
       
       setUser(user)
-      fetchCommittee()
+      fetchData()
     }
 
     checkUser()
   }, [])
 
-  async function fetchCommittee() {
+  async function fetchData() {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from('committee')
-      .select('*')
-      .order('display_order')
+    const [committeeResult, contentResult] = await Promise.all([
+      supabase
+        .from('committee')
+        .select('*')
+        .order('display_order'),
+      supabase
+        .from('committee_content')
+        .select('*')
+    ])
 
-    if (error) {
-      console.error('Error fetching committee:', error)
+    if (committeeResult.error) {
+      console.error('Error fetching committee:', committeeResult.error)
     } else {
-      setCommittee(data || [])
+      setCommittee(committeeResult.data || [])
     }
+
+    if (contentResult.error) {
+      console.error('Error fetching committee content:', contentResult.error)
+    } else {
+      setCommitteeContent(contentResult.data || [])
+    }
+    
     setLoading(false)
   }
 
@@ -118,10 +163,50 @@ export default function AdminCommittee() {
 
       // Reset form and refresh data
       resetForm()
-      fetchCommittee()
+      fetchData()
     } catch (error) {
       console.error('Error saving committee member:', error)
       alert('Error saving committee member. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleContentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+
+    try {
+      const supabase = createClient()
+      
+      const contentData = {
+        ...contentFormData,
+        committee_type: activeTab
+      }
+
+      if (editingContent) {
+        // Update existing content
+        const { error } = await supabase
+          .from('committee_content')
+          .update(contentData)
+          .eq('id', editingContent.id)
+
+        if (error) throw error
+      } else {
+        // Create new content
+        const { error } = await supabase
+          .from('committee_content')
+          .insert([contentData])
+
+        if (error) throw error
+      }
+
+      // Reset form and refresh data
+      resetContentForm()
+      fetchData()
+    } catch (error) {
+      console.error('Error saving committee content:', error)
+      alert('Error saving committee content. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -137,10 +222,23 @@ export default function AdminCommittee() {
       bio_en: member.bio_en || '',
       bio_ne: member.bio_ne || '',
       display_order: member.display_order,
-      is_active: member.is_active
+      is_active: member.is_active,
+      committee_type: member.committee_type
     })
     setPhotoUrl(member.photo_url)
     setShowForm(true)
+  }
+
+  const handleEditContent = (content: CommitteeContent) => {
+    setEditingContent(content)
+    setContentFormData({
+      title_en: content.title_en,
+      title_ne: content.title_ne,
+      description_en: content.description_en || '',
+      description_ne: content.description_ne || '',
+      is_active: content.is_active
+    })
+    setShowContentForm(true)
   }
 
   const handleDelete = async (id: number) => {
@@ -154,7 +252,7 @@ export default function AdminCommittee() {
         .eq('id', id)
 
       if (error) throw error
-      fetchCommittee()
+      fetchData()
     } catch (error) {
       console.error('Error deleting committee member:', error)
       alert('Error deleting committee member. Please try again.')
@@ -170,12 +268,29 @@ export default function AdminCommittee() {
       bio_en: '',
       bio_ne: '',
       display_order: 0,
-      is_active: true
+      is_active: true,
+      committee_type: activeTab
     })
     setPhotoUrl(null)
     setShowForm(false)
     setEditingMember(null)
   }
+
+  const resetContentForm = () => {
+    setContentFormData({
+      title_en: '',
+      title_ne: '',
+      description_en: '',
+      description_ne: '',
+      is_active: true
+    })
+    setShowContentForm(false)
+    setEditingContent(null)
+  }
+
+  // Filter committee members by active tab
+  const filteredCommittee = committee.filter(member => member.committee_type === activeTab)
+  const currentContent = committeeContent.find(content => content.committee_type === activeTab)
 
   if (loading) {
     return (
@@ -204,24 +319,102 @@ export default function AdminCommittee() {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Committee Management</h1>
-              <p className="text-gray-600">Manage management committee members</p>
+              <p className="text-gray-600">Manage SMC and PTA committee members and content</p>
             </div>
-            <Button 
-              onClick={() => setShowForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Add Committee Member
-            </Button>
+            <div className="flex space-x-3">
+              <Button 
+                onClick={() => setShowContentForm(true)}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Manage Content
+              </Button>
+              <Button 
+                onClick={() => setShowForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Add Committee Member
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          {/* Tab Navigation */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white rounded-lg p-2 shadow-sm border">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setActiveTab('SMC')}
+                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
+                    activeTab === 'SMC'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Building size={20} />
+                  <span>SMC</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('PTA')}
+                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
+                    activeTab === 'PTA'
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Users2 size={20} />
+                  <span>PTA</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Committee Content Section */}
+          {currentContent && (
+            <div className="bg-white shadow rounded-lg p-6 mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {activeTab} Content
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditContent(currentContent)}
+                >
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Edit Content
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-medium text-gray-700 mb-2">Title</h3>
+                  <p className="text-gray-900">{currentContent.title_en}</p>
+                  <p className="text-gray-600 text-sm mt-1">{currentContent.title_ne}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-700 mb-2">Description</h3>
+                  <p className="text-gray-900 text-sm">{currentContent.description_en}</p>
+                  <p className="text-gray-600 text-sm mt-1">{currentContent.description_ne}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Committee List */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                {activeTab} Committee Members
+              </h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                Manage {activeTab} committee member profiles and information
+              </p>
+            </div>
             <ul className="divide-y divide-gray-200">
-              {committee.map((member) => (
+              {filteredCommittee.map((member) => (
                 <li key={member.id}>
                   <div className="px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center">
@@ -274,12 +467,17 @@ export default function AdminCommittee() {
                   </div>
                 </li>
               ))}
+              {filteredCommittee.length === 0 && (
+                <li className="px-4 py-8 text-center text-gray-500">
+                  No {activeTab} committee members found. Add some members to get started.
+                </li>
+              )}
             </ul>
           </div>
         </div>
       </main>
 
-      {/* Form Modal */}
+      {/* Committee Member Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -299,6 +497,34 @@ export default function AdminCommittee() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Committee Type
+                    </label>
+                    <select
+                      value={formData.committee_type}
+                      onChange={(e) => setFormData({...formData, committee_type: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="SMC">SMC (School Management Committee)</option>
+                      <option value="PTA">PTA (Parents Teachers Association)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Display Order
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.display_order}
+                      onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -391,31 +617,18 @@ export default function AdminCommittee() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Display Order
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.display_order}
-                      onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value)})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Status
-                    </label>
-                    <select
-                      value={formData.is_active.toString()}
-                      onChange={(e) => setFormData({...formData, is_active: e.target.value === 'true'})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={formData.is_active.toString()}
+                    onChange={(e) => setFormData({...formData, is_active: e.target.value === 'true'})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
                 </div>
 
                 <div className="flex justify-end space-x-4">
@@ -428,6 +641,127 @@ export default function AdminCommittee() {
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     {submitting ? 'Saving...' : editingMember ? 'Update Member' : 'Add Member'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Committee Content Form Modal */}
+      {showContentForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {editingContent ? 'Edit Committee Content' : 'Add Committee Content'}
+                </h2>
+                <button
+                  onClick={resetContentForm}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleContentSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Committee Type
+                  </label>
+                  <select
+                    value={activeTab}
+                    onChange={(e) => setActiveTab(e.target.value as 'SMC' | 'PTA')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="SMC">SMC (School Management Committee)</option>
+                    <option value="PTA">PTA (Parents Teachers Association)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Title (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={contentFormData.title_en}
+                      onChange={(e) => setContentFormData({...contentFormData, title_en: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Title (नेपाली)
+                    </label>
+                    <input
+                      type="text"
+                      value={contentFormData.title_ne}
+                      onChange={(e) => setContentFormData({...contentFormData, title_ne: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (English)
+                    </label>
+                    <textarea
+                      value={contentFormData.description_en}
+                      onChange={(e) => setContentFormData({...contentFormData, description_en: e.target.value})}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (नेपाली)
+                    </label>
+                    <textarea
+                      value={contentFormData.description_ne}
+                      onChange={(e) => setContentFormData({...contentFormData, description_ne: e.target.value})}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={contentFormData.is_active.toString()}
+                    onChange={(e) => setContentFormData({...contentFormData, is_active: e.target.value === 'true'})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                  <Button type="button" variant="outline" onClick={resetContentForm}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {submitting ? 'Saving...' : editingContent ? 'Update Content' : 'Add Content'}
                   </Button>
                 </div>
               </form>

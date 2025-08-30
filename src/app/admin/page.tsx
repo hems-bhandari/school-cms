@@ -61,6 +61,7 @@ interface CommitteeData {
   name_en: string
   name_ne: string
   is_active: boolean
+  committee_type: string
 }
 
 interface ActivityData {
@@ -343,9 +344,9 @@ export default function AdminDashboard() {
                 <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                   <Building className="text-white" size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Committee</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Committees</h3>
                 <p className="text-gray-600 text-sm mb-4">
-                  Manage management committee members
+                  Manage SMC and PTA committee members
                 </p>
               </div>
               <div className="px-6 pb-6">

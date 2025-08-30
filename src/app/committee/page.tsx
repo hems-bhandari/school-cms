@@ -6,7 +6,9 @@ import { Navigation } from '@/components/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Image from 'next/image'
 import { 
-  Users
+  Users,
+  Building,
+  Users2
 } from 'lucide-react'
 
 interface Committee {
@@ -20,6 +22,17 @@ interface Committee {
   bio_ne: string | null
   display_order: number
   is_active: boolean
+  committee_type: string
+}
+
+interface CommitteeContent {
+  id: number
+  committee_type: string
+  title_en: string
+  title_ne: string
+  description_en: string | null
+  description_ne: string | null
+  is_active: boolean
 }
 
 interface CommitteeCardProps {
@@ -29,8 +42,25 @@ interface CommitteeCardProps {
 }
 
 function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
-  const getRoleColor = (role: string) => {
+  const getRoleColor = (role: string, committeeType: string) => {
     const roleL = role.toLowerCase()
+    const typeL = committeeType.toLowerCase()
+    
+    // PTA specific colors
+    if (typeL === 'pta') {
+      if (roleL.includes('president') || roleL.includes('अध्यक्ष')) {
+        return 'from-green-500 to-emerald-500'
+      }
+      if (roleL.includes('vice') || roleL.includes('उपाध्यक्ष')) {
+        return 'from-teal-500 to-cyan-500'
+      }
+      if (roleL.includes('secretary') || roleL.includes('सचिव')) {
+        return 'from-blue-500 to-indigo-500'
+      }
+      return 'from-green-400 to-teal-400'
+    }
+    
+    // SMC specific colors
     if (roleL.includes('chair') || roleL.includes('president') || roleL.includes('अध्यक्ष')) {
       return 'from-amber-500 to-orange-500'
     }
@@ -46,7 +76,7 @@ function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
     return 'from-gray-500 to-slate-500'
   }
 
-  const roleColor = getRoleColor(locale === 'en' ? member.role_en : member.role_ne)
+  const roleColor = getRoleColor(locale === 'en' ? member.role_en : member.role_ne, member.committee_type)
 
   return (
     <div 
@@ -70,7 +100,16 @@ function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-
+        {/* Committee Type Badge */}
+        <div className="absolute top-3 right-3">
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+            member.committee_type === 'PTA' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-amber-100 text-amber-800'
+          }`}>
+            {member.committee_type}
+          </span>
+        </div>
       </div>
       
       {/* Content Section */}
@@ -105,22 +144,37 @@ function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
 export default function CommitteePage() {
   const { locale, t } = useLanguage()
   const [committee, setCommittee] = useState<Committee[]>([])
+  const [committeeContent, setCommitteeContent] = useState<CommitteeContent[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'SMC' | 'PTA'>('SMC')
 
   useEffect(() => {
     async function fetchCommittee() {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('committee')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order')
+      const [committeeResult, contentResult] = await Promise.all([
+        supabase
+          .from('committee')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order'),
+        supabase
+          .from('committee_content')
+          .select('*')
+          .eq('is_active', true)
+      ])
 
-      if (error) {
-        console.error('Error fetching committee:', error)
+      if (committeeResult.error) {
+        console.error('Error fetching committee:', committeeResult.error)
       } else {
-        setCommittee(data || [])
+        setCommittee(committeeResult.data || [])
       }
+
+      if (contentResult.error) {
+        console.error('Error fetching committee content:', contentResult.error)
+      } else {
+        setCommitteeContent(contentResult.data || [])
+      }
+      
       setLoading(false)
     }
 
@@ -141,7 +195,15 @@ export default function CommitteePage() {
     )
   }
 
-  // Group committee members by role hierarchy
+  // Group committee members by committee type
+  const smcMembers = committee.filter(member => member.committee_type === 'SMC')
+  const ptaMembers = committee.filter(member => member.committee_type === 'PTA')
+
+  // Get content for each committee type
+  const smcContent = committeeContent.find(content => content.committee_type === 'SMC')
+  const ptaContent = committeeContent.find(content => content.committee_type === 'PTA')
+
+  // Sort members by hierarchy
   const getHierarchy = (role: string) => {
     const roleL = role.toLowerCase()
     if (roleL.includes('chair') || roleL.includes('president') || roleL.includes('अध्यक्ष')) return 1
@@ -151,12 +213,17 @@ export default function CommitteePage() {
     return 5
   }
 
-  const sortedCommittee = [...committee].sort((a, b) => {
-    const aHierarchy = getHierarchy(locale === 'en' ? a.role_en : a.role_ne)
-    const bHierarchy = getHierarchy(locale === 'en' ? b.role_en : b.role_ne)
-    if (aHierarchy !== bHierarchy) return aHierarchy - bHierarchy
-    return a.display_order - b.display_order
-  })
+  const sortMembers = (members: Committee[]) => {
+    return [...members].sort((a, b) => {
+      const aHierarchy = getHierarchy(locale === 'en' ? a.role_en : a.role_ne)
+      const bHierarchy = getHierarchy(locale === 'en' ? b.role_en : b.role_ne)
+      if (aHierarchy !== bHierarchy) return aHierarchy - bHierarchy
+      return a.display_order - b.display_order
+    })
+  }
+
+  const sortedSmcMembers = sortMembers(smcMembers)
+  const sortedPtaMembers = sortMembers(ptaMembers)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -169,13 +236,13 @@ export default function CommitteePage() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fadeInUp">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {locale === 'en' ? 'Management Committee' : 'व्यवस्थापन समिति'}
+                {locale === 'en' ? 'School Committees' : 'विद्यालय समितिहरू'}
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto animate-fadeInUp leading-relaxed" style={{ animationDelay: '200ms' }}>
               {locale === 'en' 
-                ? 'Meet our dedicated management committee members who guide our school towards excellence and ensure quality education for all students.'
-                : 'हाम्रो विद्यालयलाई उत्कृष्टताको दिशामा डोर्याउने र सबै विद्यार्थीहरूको लागि गुणस्तरीय शिक्षा सुनिश्चित गर्ने समर्पित व्यवस्थापन समितिका सदस्यहरूलाई चिन्नुहोस्।'
+                ? 'Meet our dedicated committee members who guide our school towards excellence and ensure quality education for all students.'
+                : 'हाम्रो विद्यालयलाई उत्कृष्टताको दिशामा डोर्याउने र सबै विद्यार्थीहरूको लागि गुणस्तरीय शिक्षा सुनिश्चित गर्ने समर्पित समितिका सदस्यहरूलाई चिन्नुहोस्।'
               }
             </p>
           </div>
@@ -183,37 +250,130 @@ export default function CommitteePage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        {committee.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 border border-white/20 shadow-xl max-w-2xl mx-auto">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="text-gray-400" size={32} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-700 mb-2">
-                {locale === 'en' ? 'No Committee Members Found' : 'समितिका सदस्यहरू भेटिएनन्'}
-              </h3>
-              <p className="text-gray-500">
-                {locale === 'en' 
-                  ? 'Committee member profiles will appear here once they are added.'
-                  : 'समितिका सदस्यहरूको प्रोफाइल थपिएपछि यहाँ देखिनेछ।'
-                }
-              </p>
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-white/20">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setActiveTab('SMC')}
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
+                  activeTab === 'SMC'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Building size={20} />
+                <span>SMC</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('PTA')}
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
+                  activeTab === 'PTA'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <Users2 size={20} />
+                <span>PTA</span>
+              </button>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Committee Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {sortedCommittee.map((member, index) => (
-                <CommitteeCard
-                  key={member.id}
-                  member={member}
-                  locale={locale}
-                  index={index}
-                />
-              ))}
-            </div>
-          </>
+        </div>
+
+        {/* SMC Section */}
+        {activeTab === 'SMC' && (
+          <div className="animate-fadeInUp">
+            {/* SMC Content */}
+            {smcContent && (
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                  {locale === 'en' ? smcContent.title_en : smcContent.title_ne}
+                </h2>
+                <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                  {locale === 'en' ? smcContent.description_en : smcContent.description_ne}
+                </p>
+              </div>
+            )}
+
+            {/* SMC Members */}
+            {sortedSmcMembers.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 border border-white/20 shadow-xl max-w-2xl mx-auto">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Building className="text-gray-400" size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-700 mb-2">
+                    {locale === 'en' ? 'No SMC Members Found' : 'एसएमसी सदस्यहरू भेटिएनन्'}
+                  </h3>
+                  <p className="text-gray-500">
+                    {locale === 'en' 
+                      ? 'SMC member profiles will appear here once they are added.'
+                      : 'एसएमसी सदस्यहरूको प्रोफाइल थपिएपछि यहाँ देखिनेछ।'
+                    }
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {sortedSmcMembers.map((member, index) => (
+                  <CommitteeCard
+                    key={member.id}
+                    member={member}
+                    locale={locale}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PTA Section */}
+        {activeTab === 'PTA' && (
+          <div className="animate-fadeInUp">
+            {/* PTA Content */}
+            {ptaContent && (
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                  {locale === 'en' ? ptaContent.title_en : ptaContent.title_ne}
+                </h2>
+                <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                  {locale === 'en' ? ptaContent.description_en : ptaContent.description_ne}
+                </p>
+              </div>
+            )}
+
+            {/* PTA Members */}
+            {sortedPtaMembers.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 border border-white/20 shadow-xl max-w-2xl mx-auto">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users2 className="text-gray-400" size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-700 mb-2">
+                    {locale === 'en' ? 'No PTA Members Found' : 'पीटीए सदस्यहरू भेटिएनन्'}
+                  </h3>
+                  <p className="text-gray-500">
+                    {locale === 'en' 
+                      ? 'PTA member profiles will appear here once they are added.'
+                      : 'पीटीए सदस्यहरूको प्रोफाइल थपिएपछि यहाँ देखिनेछ।'
+                    }
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {sortedPtaMembers.map((member, index) => (
+                  <CommitteeCard
+                    key={member.id}
+                    member={member}
+                    locale={locale}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
