@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
 import { Button } from '@/components/ui/button'
 import { Plus, Edit, Trash2, Calendar, Tag, AlertCircle } from 'lucide-react'
+import NoticeFileUpload, { FileAttachment } from '@/components/NoticeFileUpload'
 
 interface Notice {
   id: number
@@ -20,6 +21,7 @@ interface Notice {
   expiry_date?: string
   attachment_url?: string
   attachment_name?: string
+  attachments?: FileAttachment[]
   is_published: boolean
   is_featured: boolean
   display_order: number
@@ -35,6 +37,7 @@ interface NoticeFormData {
   priority: string
   published_date: string
   expiry_date: string
+  attachments: FileAttachment[]
   is_published: boolean
   is_featured: boolean
   display_order: number
@@ -57,6 +60,7 @@ export default function AdminNoticesPage() {
     priority: 'normal',
     published_date: new Date().toISOString().split('T')[0],
     expiry_date: '',
+    attachments: [],
     is_published: true,
     is_featured: false,
     display_order: 0
@@ -78,6 +82,7 @@ export default function AdminNoticesPage() {
     }
 
     checkUser()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchNotices = async () => {
@@ -128,6 +133,7 @@ export default function AdminNoticesPage() {
         priority: 'normal',
         published_date: new Date().toISOString().split('T')[0],
         expiry_date: '',
+        attachments: [],
         is_published: true,
         is_featured: false,
         display_order: 0
@@ -151,6 +157,7 @@ export default function AdminNoticesPage() {
       priority: notice.priority,
       published_date: notice.published_date,
       expiry_date: notice.expiry_date || '',
+      attachments: notice.attachments || [],
       is_published: notice.is_published,
       is_featured: notice.is_featured,
       display_order: notice.display_order
@@ -232,6 +239,7 @@ export default function AdminNoticesPage() {
                 priority: 'normal',
                 published_date: new Date().toISOString().split('T')[0],
                 expiry_date: '',
+                attachments: [],
                 is_published: true,
                 is_featured: false,
                 display_order: 0
@@ -405,6 +413,19 @@ export default function AdminNoticesPage() {
                   />
                   <span className="ml-2 text-sm text-gray-700">Featured</span>
                 </label>
+              </div>
+
+              {/* File Attachments */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Attachments (Images & PDFs)
+                </label>
+                <NoticeFileUpload
+                  currentFiles={formData.attachments}
+                  onFilesUploaded={(files) => setFormData({ ...formData, attachments: files })}
+                  bucketName="notice-attachments"
+                  maxFiles={20}
+                />
               </div>
 
               <div className="flex gap-4">

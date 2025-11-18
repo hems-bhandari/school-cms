@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
+import ImageLightbox from '@/components/ImageLightbox'
+import Image from 'next/image'
 import { 
   Calendar, 
   Download, 
@@ -14,8 +16,17 @@ import {
   FileText,
   Filter,
   Megaphone,
-  Bell
+  Bell,
+  Image as ImageIcon,
+  ExternalLink
 } from 'lucide-react'
+
+interface FileAttachment {
+  url: string
+  name: string
+  type: string
+  size: number
+}
 
 interface Notice {
     id: number
@@ -29,6 +40,7 @@ interface Notice {
     expiry_date?: string
     attachment_url?: string
     attachment_name?: string
+    attachments?: FileAttachment[]
     is_featured: boolean
     created_at: string
 }
@@ -41,6 +53,19 @@ interface NoticeCardProps {
 }
 
 function NoticeCard({ notice, locale, t, index }: NoticeCardProps) {
+    const [lightboxOpen, setLightboxOpen] = useState(false)
+    const [lightboxIndex, setLightboxIndex] = useState(0)
+    
+    const images = (notice.attachments || []).filter(file => file.type.startsWith('image/'))
+    const pdfs = (notice.attachments || []).filter(file => file.type === 'application/pdf')
+    
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes'
+        const k = 1024
+        const sizes = ['Bytes', 'KB', 'MB', 'GB']
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+    }
     const getPriorityConfig = (priority: string) => {
         switch (priority) {
             case 'urgent': return { 
@@ -174,8 +199,89 @@ function NoticeCard({ notice, locale, t, index }: NoticeCardProps) {
                     {locale === 'en' ? notice.content_en : notice.content_ne}
                 </div>
 
-                {/* Attachment */}
-                {notice.attachment_url && notice.attachment_name && (
+                {/* Image Gallery */}
+                {images.length > 0 && (
+                    <div className="mt-6">
+                        <div className="flex items-center space-x-2 mb-3">
+                            <ImageIcon size={18} className="text-blue-600" />
+                            <span className="text-sm font-semibold text-gray-700">Images ({images.length})</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {images.map((image, idx) => (
+                                <div 
+                                    key={idx}
+                                    className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
+                                    onClick={() => {
+                                        setLightboxIndex(idx)
+                                        setLightboxOpen(true)
+                                    }}
+                                >
+                                    <Image
+                                        src={image.url}
+                                        alt={image.name}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                                        sizes="(max-width: 768px) 50vw, 33vw"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                                        <ExternalLink className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" size={24} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* PDF Documents */}
+                {pdfs.length > 0 && (
+                    <div className="mt-6">
+                        <div className="flex items-center space-x-2 mb-3">
+                            <FileText size={18} className="text-red-600" />
+                            <span className="text-sm font-semibold text-gray-700">PDF Documents ({pdfs.length})</span>
+                        </div>
+                        <div className="space-y-4">
+                            {pdfs.map((pdf, idx) => (
+                                <div key={idx} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                                    {/* PDF Header */}
+                                    <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 border-b border-red-100">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                <div className="bg-red-500 text-white p-2 rounded-lg flex-shrink-0">
+                                                    <FileText size={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">{pdf.name}</p>
+                                                    <p className="text-xs text-gray-500">{formatFileSize(pdf.size)}</p>
+                                                </div>
+                                            </div>
+                                            <a
+                                                href={pdf.url}
+                                                download={pdf.name}
+                                                className="ml-4 inline-flex items-center space-x-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-shrink-0"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <Download size={16} />
+                                                <span>Download</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Embedded PDF Viewer */}
+                                    <div className="relative bg-gray-100" style={{ height: '500px' }}>
+                                        <iframe
+                                            src={pdf.url}
+                                            className="w-full h-full border-0"
+                                            title={pdf.name}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Legacy Attachment (Backward Compatibility) */}
+                {notice.attachment_url && notice.attachment_name && !notice.attachments && (
                     <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-100">
                         <div className="flex items-center space-x-2 mb-2">
                             <FileText size={16} className="text-blue-600" />
@@ -193,6 +299,15 @@ function NoticeCard({ notice, locale, t, index }: NoticeCardProps) {
                     </div>
                 )}
             </div>
+            
+            {/* Image Lightbox */}
+            {lightboxOpen && images.length > 0 && (
+                <ImageLightbox
+                    images={images.map(img => ({ url: img.url, name: img.name }))}
+                    initialIndex={lightboxIndex}
+                    onClose={() => setLightboxOpen(false)}
+                />
+            )}
         </div>
     )
 }
