@@ -180,9 +180,9 @@ export default function Footer() {
             </p>
             <div className="mt-4 md:mt-0">
               <p className="text-gray-400 text-xs">
-                Made with ❤️ by{' '}
+                Made voluntarily by {' '}
                 <a 
-                  href="#" 
+                  href="hemss.me" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
