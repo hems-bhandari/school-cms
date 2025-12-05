@@ -70,11 +70,10 @@ export default function AdminAbout() {
       const { data, error } = await supabase
         .from('student_counts')
         .select('*')
-        .returns<StudentCountRecord[]>()
         .order('display_order')
 
       if (error) throw error
-      const records = data ?? []
+      const records = (data ?? []) as StudentCountRecord[]
       setStudentCounts(records.map((d) => ({ id: d.id, level: d.level, boys: d.boys, girls: d.girls, display_order: d.display_order })))
     } catch (err: unknown) {
       setError(`Failed to load student counts: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -106,7 +105,7 @@ export default function AdminAbout() {
           .select()
           .single()
         if (error) throw error
-        savedData = data
+        savedData = data as AboutData
       } else {
         // Insert new record
         const { data, error } = await supabase
@@ -115,7 +114,7 @@ export default function AdminAbout() {
           .select()
           .single()
         if (error) throw error
-        savedData = data
+        savedData = data as AboutData
       }
 
       setAboutData(savedData)
