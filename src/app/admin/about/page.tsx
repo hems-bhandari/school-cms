@@ -89,36 +89,36 @@ export default function AdminAbout() {
     setSuccess('')
 
     try {
-      const updateData = {
+      const updateData: Database['public']['Tables']['about']['Update'] = {
         content_en: contentEn.trim() || null,
         content_ne: contentNe.trim() || null,
         updated_at: new Date().toISOString(),
       }
 
-      let result
+      let savedData: AboutData | null = null
 
       if (aboutData?.id) {
         // Update existing record
-        result = await supabase
+        const { data, error } = await supabase
           .from('about')
           .update(updateData)
           .eq('id', aboutData.id)
           .select()
           .single()
+        if (error) throw error
+        savedData = data
       } else {
         // Insert new record
-        result = await supabase
+        const { data, error } = await supabase
           .from('about')
-          .insert(updateData)
+          .insert(updateData as Database['public']['Tables']['about']['Insert'])
           .select()
           .single()
+        if (error) throw error
+        savedData = data
       }
 
-      if (result.error) {
-        throw result.error
-      }
-
-      setAboutData(result.data as AboutData)
+      setAboutData(savedData)
       setSuccess('Content saved successfully!')
       
       // Clear success message after 3 seconds
