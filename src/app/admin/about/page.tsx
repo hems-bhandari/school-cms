@@ -2,25 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
+import type { Database } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-interface AboutData {
-  id: number
-  content_en: string | null
-  content_ne: string | null
-  created_at: string
-  updated_at: string
-}
+type AboutData = Database['public']['Tables']['about']['Row']
 
 interface StudentCountRow {
   id?: number
   level: string
   boys: number
   girls: number
-  display_order?: number
+  display_order?: number | null
 }
+
+type StudentCountRecord = Database['public']['Tables']['student_counts']['Row']
 
 export default function AdminAbout() {
   const [aboutData, setAboutData] = useState<AboutData | null>(null)
@@ -73,10 +70,12 @@ export default function AdminAbout() {
       const { data, error } = await supabase
         .from('student_counts')
         .select('*')
+        .returns<StudentCountRecord[]>()
         .order('display_order')
 
       if (error) throw error
-      setStudentCounts((data || []).map((d) => ({ id: d.id, level: d.level, boys: d.boys, girls: d.girls, display_order: d.display_order })))
+      const records = data ?? []
+      setStudentCounts(records.map((d) => ({ id: d.id, level: d.level, boys: d.boys, girls: d.girls, display_order: d.display_order })))
     } catch (err: unknown) {
       setError(`Failed to load student counts: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
