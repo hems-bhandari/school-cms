@@ -53,10 +53,12 @@ export default function AdminAbout() {
         throw error
       }
 
-      if (data) {
-        setAboutData(data)
-        setContentEn(data.content_en || '')
-        setContentNe(data.content_ne || '')
+      const aboutRecord = data as AboutData | null
+
+      if (aboutRecord) {
+        setAboutData(aboutRecord)
+        setContentEn(aboutRecord.content_en || '')
+        setContentNe(aboutRecord.content_ne || '')
       }
     } catch (err: unknown) {
       setError(`Failed to load content: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -117,7 +119,7 @@ export default function AdminAbout() {
         throw result.error
       }
 
-      setAboutData(result.data)
+      setAboutData(result.data as AboutData)
       setSuccess('Content saved successfully!')
       
       // Clear success message after 3 seconds
