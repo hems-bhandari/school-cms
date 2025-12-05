@@ -126,6 +126,35 @@ export type Database = {
           updated_at?: string
         }
       }
+      student_counts: {
+        Row: {
+          id: number
+          level: string
+          boys: number
+          girls: number
+          display_order: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          level: string
+          boys?: number
+          girls?: number
+          display_order?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          level?: string
+          boys?: number
+          girls?: number
+          display_order?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
