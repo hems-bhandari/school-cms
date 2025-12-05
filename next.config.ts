@@ -19,8 +19,6 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   // Compress responses
   compress: true,
-  // Enable SWC minification
-  swcMinify: true,
 };
 
 export default nextConfig;
