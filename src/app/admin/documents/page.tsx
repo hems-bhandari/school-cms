@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase-client'
 import { Plus, Download, Edit, Trash2, FileText, Upload } from 'lucide-react'
+import { createStorageFileName, DOCUMENT_UPLOAD_TYPES, validateUpload } from '@/lib/uploads'
 
 interface Document {
   id: number
@@ -66,8 +67,9 @@ export default function AdminDocumentsPage() {
   }
 
   const handleFileUpload = async (file: File) => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+    const validationError = validateUpload(file, DOCUMENT_UPLOAD_TYPES, 25)
+    if (validationError) throw new Error(validationError)
+    const fileName = createStorageFileName(file)
     const filePath = `documents/${fileName}`
 
     const { error: uploadError } = await supabase.storage

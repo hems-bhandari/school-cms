@@ -20,6 +20,7 @@ import {
   Image as ImageIcon,
   ExternalLink
 } from 'lucide-react'
+import { getSafeHttpsUrl } from '@/lib/safe-url'
 
 interface FileAttachment {
   url: string
@@ -56,8 +57,13 @@ function NoticeCard({ notice, locale, t, index }: NoticeCardProps) {
     const [lightboxOpen, setLightboxOpen] = useState(false)
     const [lightboxIndex, setLightboxIndex] = useState(0)
     
-    const images = (notice.attachments || []).filter(file => file.type.startsWith('image/'))
-    const pdfs = (notice.attachments || []).filter(file => file.type === 'application/pdf')
+    const images = (notice.attachments || []).filter(
+      file => file.type.startsWith('image/') && getSafeHttpsUrl(file.url)
+    )
+    const pdfs = (notice.attachments || []).filter(
+      file => file.type === 'application/pdf' && getSafeHttpsUrl(file.url)
+    )
+    const legacyAttachmentUrl = getSafeHttpsUrl(notice.attachment_url)
     
     const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 Bytes'
@@ -281,14 +287,14 @@ function NoticeCard({ notice, locale, t, index }: NoticeCardProps) {
                 )}
 
                 {/* Legacy Attachment (Backward Compatibility) */}
-                {notice.attachment_url && notice.attachment_name && !notice.attachments && (
+                {legacyAttachmentUrl && notice.attachment_name && !notice.attachments && (
                     <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-100">
                         <div className="flex items-center space-x-2 mb-2">
                             <FileText size={16} className="text-blue-600" />
                             <span className="text-sm font-medium text-gray-700">Attachment</span>
                         </div>
                         <a
-                            href={notice.attachment_url}
+                            href={legacyAttachmentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium transition-colors group"
@@ -315,7 +321,6 @@ function NoticeCard({ notice, locale, t, index }: NoticeCardProps) {
 export default function NoticesPage() {
     const { locale, t } = useLanguage()
     const [notices, setNotices] = useState<Notice[]>([])
-    const [filteredNotices, setFilteredNotices] = useState<Notice[]>([])
     const [selectedCategory, setSelectedCategory] = useState<string>('all')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -352,7 +357,6 @@ export default function NoticesPage() {
                     !notice.expiry_date || notice.expiry_date >= currentDate
                 )
                 setNotices(activeNotices)
-                setFilteredNotices(activeNotices)
             }
             setLoading(false)
         }
@@ -360,17 +364,13 @@ export default function NoticesPage() {
         fetchNotices()
     }, [])
 
-    useEffect(() => {
-        if (selectedCategory === 'all') {
-            setFilteredNotices(notices)
-        } else {
-            setFilteredNotices(notices.filter(notice => notice.category === selectedCategory))
-        }
-    }, [selectedCategory, notices])
+    const filteredNotices = selectedCategory === 'all'
+        ? notices
+        : notices.filter(notice => notice.category === selectedCategory)
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+            <div className="public-page min-h-screen">
                 <Navigation />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="text-center">
@@ -386,11 +386,11 @@ export default function NoticesPage() {
     const regularNotices = filteredNotices.filter(notice => !notice.is_featured)
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="public-page min-h-screen">
             <Navigation />
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden py-20 lg:py-32">
+            <section className="official-page-header">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
@@ -497,7 +497,7 @@ export default function NoticesPage() {
                             {error ? (
                                 <div className="text-center">
                                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <span className="text-red-600 text-2xl">⚠</span>
+                                        <AlertCircle className="text-red-600" size={26} aria-hidden="true" />
                                     </div>
                                     <h3 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h3>
                                     <p className="text-gray-600">{error}</p>

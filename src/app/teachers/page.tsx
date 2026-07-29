@@ -12,7 +12,8 @@ import {
   GraduationCap, 
   BookOpen, 
   Users,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from 'lucide-react'
 
 type Teacher = Database['public']['Tables']['teachers']['Row']
@@ -21,31 +22,26 @@ interface TeacherCardProps {
   teacher: Teacher
   locale: 'en' | 'ne'
   t: (key: string) => string
-  index: number
 }
 
-function TeacherCard({ teacher, locale, t, index }: TeacherCardProps) {
+function TeacherCard({ teacher, locale, t }: TeacherCardProps) {
   return (
-    <div 
-      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group animate-fadeInUp"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
+    <article className="overflow-hidden border border-slate-200 bg-white">
       {/* Photo Section */}
-      <div className="relative aspect-square bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden">
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-slate-100">
         {teacher.photo_url ? (
           <Image
             src={teacher.photo_url}
             alt={locale === 'en' ? teacher.name_en : teacher.name_ne}
             width={400}
             height={400}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+          <div className="flex h-24 w-24 items-center justify-center rounded-sm bg-[#0b2545] text-3xl font-bold text-white">
             {(locale === 'en' ? teacher.name_en : teacher.name_ne).charAt(0)}
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
       
       {/* Content Section */}
@@ -54,10 +50,10 @@ function TeacherCard({ teacher, locale, t, index }: TeacherCardProps) {
           <h3 className="text-xl font-bold text-gray-900 mb-2">
             {locale === 'en' ? teacher.name_en : teacher.name_ne}
           </h3>
-          <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-medium rounded-full">
-            <GraduationCap size={16} className="mr-1" />
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#0b2545]">
+            <GraduationCap size={16} aria-hidden="true" />
             {locale === 'en' ? teacher.position_en : teacher.position_ne}
-          </div>
+          </p>
         </div>
         
         {/* Bio Preview */}
@@ -75,25 +71,21 @@ function TeacherCard({ teacher, locale, t, index }: TeacherCardProps) {
         {/* Info Grid */}
         <div className="space-y-3 mb-4">
           {teacher.experience_years > 0 && (
-            <div className="flex items-center space-x-3 p-2 bg-blue-50 rounded-lg">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <Calendar size={16} className="text-blue-600" />
-              </div>
+            <div className="flex items-center space-x-3 border-t border-slate-200 py-3">
+              <Calendar size={17} className="text-[#b68a2c]" aria-hidden="true" />
               <div className="flex-1">
                 <span className="text-sm text-gray-600">{t('common.experience')}</span>
-                <div className="font-semibold text-blue-600">{teacher.experience_years} {t('common.years')}</div>
+                <div className="font-semibold text-slate-800">{teacher.experience_years} {t('common.years')}</div>
               </div>
             </div>
           )}
           
           {((locale === 'en' && teacher.specialization_en) || (locale === 'ne' && teacher.specialization_ne)) && (
-            <div className="flex items-center space-x-3 p-2 bg-purple-50 rounded-lg">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <BookOpen size={16} className="text-purple-600" />
-              </div>
+            <div className="flex items-center space-x-3 border-t border-slate-200 py-3">
+              <BookOpen size={17} className="text-[#b68a2c]" aria-hidden="true" />
               <div className="flex-1">
                 <span className="text-sm text-gray-600">{t('common.specialization')}</span>
-                <div className="font-semibold text-purple-600 text-sm">
+                <div className="text-sm font-semibold text-slate-800">
                   {locale === 'en' ? teacher.specialization_en : teacher.specialization_ne}
                 </div>
               </div>
@@ -125,7 +117,7 @@ function TeacherCard({ teacher, locale, t, index }: TeacherCardProps) {
           </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -154,7 +146,7 @@ export default function TeachersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="public-page min-h-screen">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
@@ -167,18 +159,15 @@ export default function TeachersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="public-page min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+      <section className="official-page-header">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fadeInUp">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {t('teachers.title')}
-              </span>
+              {t('teachers.title')}
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto animate-fadeInUp leading-relaxed" style={{ animationDelay: '200ms' }}>
               {t('teachers.subtitle')}
@@ -192,13 +181,12 @@ export default function TeachersPage() {
           <>
             {/* Teachers Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {teachers.map((teacher, index) => (
+              {teachers.map((teacher) => (
                 <TeacherCard 
                   key={teacher.id} 
                   teacher={teacher} 
                   locale={locale} 
-                  t={t} 
-                  index={index}
+                  t={t}
                 />
               ))}
             </div>
@@ -209,7 +197,7 @@ export default function TeachersPage() {
               {error ? (
                 <div className="text-center">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-red-600 text-2xl">⚠</span>
+                    <AlertTriangle className="text-red-600" size={26} aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-bold text-red-600 mb-2">{t('common.error')}</h3>
                   <p className="text-gray-600">{error}</p>
@@ -234,7 +222,7 @@ export default function TeachersPage() {
               <div className="flex items-center space-x-2">
                 <span className="font-medium text-gray-700">Status:</span>
                 <span className={`flex items-center space-x-1 ${error ? 'text-red-600' : 'text-green-600'}`}>
-                  <span>{error ? '⚠' : '✓'}</span>
+                  <AlertTriangle size={16} aria-hidden="true" />
                   <span>{error ? 'Error' : `${teachers?.length || 0} ${t('teachers.loaded')}`}</span>
                 </span>
               </div>

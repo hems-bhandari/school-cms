@@ -14,7 +14,8 @@ import {
   Award,
   TrendingUp,
   Clock,
-  CheckCircle
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react'
 
 interface AnimatedStatsCardProps {
@@ -144,7 +145,7 @@ export default function AboutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="public-page min-h-screen">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
@@ -163,11 +164,11 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="public-page min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
+      <section className="official-page-header">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -189,13 +190,9 @@ export default function AboutPage() {
           <div className="bg-white/80 backdrop-blur-sm p-8 md:p-12 rounded-3xl border border-white/20 shadow-xl animate-scaleIn">
             {aboutData ? (
               <div className="prose prose-lg md:prose-xl max-w-none">
-                <div 
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: (locale === 'en' ? aboutData.content_en : aboutData.content_ne)
-                      .replace(/\n/g, '<br />')
-                  }}
-                />
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {locale === 'en' ? aboutData.content_en : aboutData.content_ne}
+                </div>
               </div>
             ) : (
               <div className="text-center py-8">
@@ -369,11 +366,11 @@ export default function AboutPage() {
                 <span className="font-medium text-gray-700">Status:</span>
                 <div className="flex items-center space-x-4">
                   <span className={`flex items-center space-x-1 ${aboutError ? 'text-red-600' : 'text-green-600'}`}>
-                    {aboutError ? <span>⚠</span> : <CheckCircle size={16} />}
+                    {aboutError ? <AlertTriangle size={16} aria-hidden="true" /> : <CheckCircle size={16} aria-hidden="true" />}
                     <span>About {aboutError ? 'Error' : 'Connected'}</span>
                   </span>
                   <span className={`flex items-center space-x-1 ${statsError ? 'text-red-600' : 'text-green-600'}`}>
-                    {statsError ? <span>⚠</span> : <CheckCircle size={16} />}
+                    {statsError ? <AlertTriangle size={16} aria-hidden="true" /> : <CheckCircle size={16} aria-hidden="true" />}
                     <span>Stats {statsError ? 'Error' : 'Connected'}</span>
                   </span>
                 </div>

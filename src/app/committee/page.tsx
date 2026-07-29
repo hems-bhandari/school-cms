@@ -6,7 +6,6 @@ import { Navigation } from '@/components/Navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Image from 'next/image'
 import { 
-  Users,
   Building,
   Users2
 } from 'lucide-react'
@@ -38,75 +37,29 @@ interface CommitteeContent {
 interface CommitteeCardProps {
   member: Committee
   locale: 'en' | 'ne'
-  index: number
 }
 
-function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
-  const getRoleColor = (role: string, committeeType: string) => {
-    const roleL = role.toLowerCase()
-    const typeL = committeeType.toLowerCase()
-    
-    // PTA specific colors
-    if (typeL === 'pta') {
-      if (roleL.includes('president') || roleL.includes('अध्यक्ष')) {
-        return 'from-green-500 to-emerald-500'
-      }
-      if (roleL.includes('vice') || roleL.includes('उपाध्यक्ष')) {
-        return 'from-teal-500 to-cyan-500'
-      }
-      if (roleL.includes('secretary') || roleL.includes('सचिव')) {
-        return 'from-blue-500 to-indigo-500'
-      }
-      return 'from-green-400 to-teal-400'
-    }
-    
-    // SMC specific colors
-    if (roleL.includes('chair') || roleL.includes('president') || roleL.includes('अध्यक्ष')) {
-      return 'from-amber-500 to-orange-500'
-    }
-    if (roleL.includes('vice') || roleL.includes('उपाध्यक्ष')) {
-      return 'from-purple-500 to-indigo-500'
-    }
-    if (roleL.includes('secretary') || roleL.includes('सचिव')) {
-      return 'from-blue-500 to-cyan-500'
-    }
-    if (roleL.includes('treasurer') || roleL.includes('कोषाध्यक्ष')) {
-      return 'from-green-500 to-emerald-500'
-    }
-    return 'from-gray-500 to-slate-500'
-  }
-
-  const roleColor = getRoleColor(locale === 'en' ? member.role_en : member.role_ne, member.committee_type)
-
+function CommitteeCard({ member, locale }: CommitteeCardProps) {
   return (
-    <div 
-      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group animate-fadeInUp"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
+    <article className="overflow-hidden border border-slate-200 bg-white">
       {/* Photo Section */}
-      <div className="relative aspect-square bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden">
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-slate-100">
         {member.photo_url ? (
           <Image
             src={member.photo_url}
             alt={locale === 'en' ? member.name_en : member.name_ne}
             width={400}
             height={400}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+          <div className="flex h-24 w-24 items-center justify-center rounded-sm bg-[#0b2545] text-3xl font-bold text-white">
             {(locale === 'en' ? member.name_en : member.name_ne).charAt(0)}
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
         {/* Committee Type Badge */}
         <div className="absolute top-3 right-3">
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            member.committee_type === 'PTA' 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-amber-100 text-amber-800'
-          }`}>
+          <span className="inline-flex items-center border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700">
             {member.committee_type}
           </span>
         </div>
@@ -118,14 +71,14 @@ function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
           <h3 className="text-xl font-bold text-gray-900 mb-3">
             {locale === 'en' ? member.name_en : member.name_ne}
           </h3>
-          <div className={`inline-flex items-center px-4 py-2 bg-gradient-to-r ${roleColor} text-white text-sm font-medium rounded-full shadow-lg`}>
+          <p className="text-sm font-semibold text-[#0b2545]">
             {locale === 'en' ? member.role_en : member.role_ne}
-          </div>
+          </p>
         </div>
         
         {/* Bio Preview */}
         {((locale === 'en' && member.bio_en) || (locale === 'ne' && member.bio_ne)) && (
-          <div className="mt-4 p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl">
+          <div className="mt-4 border-t border-slate-200 pt-4">
             <p className="text-gray-600 text-sm leading-relaxed" style={{ 
               display: '-webkit-box', 
               WebkitLineClamp: 4, 
@@ -137,7 +90,7 @@ function CommitteeCard({ member, locale, index }: CommitteeCardProps) {
           </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -183,7 +136,7 @@ export default function CommitteePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="public-page min-h-screen">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
@@ -226,18 +179,15 @@ export default function CommitteePage() {
   const sortedPtaMembers = sortMembers(ptaMembers)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="public-page min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+      <section className="official-page-header">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fadeInUp">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {locale === 'en' ? 'School Committees' : 'विद्यालय समितिहरू'}
-              </span>
+              {locale === 'en' ? 'School Committees' : 'विद्यालय समितिहरू'}
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto animate-fadeInUp leading-relaxed" style={{ animationDelay: '200ms' }}>
               {locale === 'en' 
@@ -258,7 +208,7 @@ export default function CommitteePage() {
                 onClick={() => setActiveTab('SMC')}
                 className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
                   activeTab === 'SMC'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                    ? 'bg-[#0b2545] text-white'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
@@ -269,7 +219,7 @@ export default function CommitteePage() {
                 onClick={() => setActiveTab('PTA')}
                 className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 ${
                   activeTab === 'PTA'
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
+                    ? 'bg-[#0b2545] text-white'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
@@ -286,7 +236,7 @@ export default function CommitteePage() {
             {/* SMC Content */}
             {smcContent && (
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                <h2 className="mb-6 text-3xl font-bold text-[#0b2545] md:text-4xl">
                   {locale === 'en' ? smcContent.title_en : smcContent.title_ne}
                 </h2>
                 <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
@@ -315,12 +265,11 @@ export default function CommitteePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {sortedSmcMembers.map((member, index) => (
+                  {sortedSmcMembers.map((member) => (
                   <CommitteeCard
                     key={member.id}
                     member={member}
-                    locale={locale}
-                    index={index}
+                      locale={locale}
                   />
                 ))}
               </div>
@@ -334,7 +283,7 @@ export default function CommitteePage() {
             {/* PTA Content */}
             {ptaContent && (
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <h2 className="mb-6 text-3xl font-bold text-[#0b2545] md:text-4xl">
                   {locale === 'en' ? ptaContent.title_en : ptaContent.title_ne}
                 </h2>
                 <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
@@ -363,12 +312,11 @@ export default function CommitteePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {sortedPtaMembers.map((member, index) => (
+                  {sortedPtaMembers.map((member) => (
                   <CommitteeCard
                     key={member.id}
                     member={member}
-                    locale={locale}
-                    index={index}
+                      locale={locale}
                   />
                 ))}
               </div>

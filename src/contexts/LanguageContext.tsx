@@ -292,7 +292,11 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale)
-    Cookies.set('locale', newLocale, { expires: 365 })
+    Cookies.set('locale', newLocale, {
+      expires: 365,
+      sameSite: 'lax',
+      secure: window.location.protocol === 'https:',
+    })
   }
 
   const t = (key: string): string => {

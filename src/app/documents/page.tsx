@@ -6,6 +6,7 @@ import { Download, FileText, Calendar, Eye, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Navigation } from '@/components/Navigation'
+import { openExternalUrl } from '@/lib/safe-url'
 
 interface Document {
   id: number
@@ -63,15 +64,16 @@ export default function DocumentsPage() {
   }
 
   const handleDownload = async (doc: Document) => {
+    if (!openExternalUrl(doc.file_url)) {
+      console.error('Refused to open an invalid document URL')
+      return
+    }
+
     try {
-      // Increment download count
-      await supabase
-        .from('documents')
-        .update({ download_count: doc.download_count + 1 })
-        .eq('id', doc.id)
-      
-      // Open file in new tab
-      window.open(doc.file_url, '_blank')
+      const { error } = await supabase.rpc('increment_document_download', {
+        document_id: doc.id,
+      })
+      if (error) throw error
       
       // Update local state
       setDocuments(docs => 
@@ -83,8 +85,6 @@ export default function DocumentsPage() {
       )
     } catch (error) {
       console.error('Error tracking download:', error)
-      // Still open the file even if tracking fails
-      window.open(doc.file_url, '_blank')
     }
   }
 
@@ -113,7 +113,7 @@ export default function DocumentsPage() {
     return (
       <>
         <Navigation />
-        <div className="min-h-screen bg-gray-50 py-12">
+        <div className="public-page min-h-screen py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -127,10 +127,10 @@ export default function DocumentsPage() {
   return (
     <>
       <Navigation />
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="public-page min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="documents-page-header text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {language === 'en' ? 'Documents & Resources' : 'कागजातहरू र स्रोतहरू'}
           </h1>

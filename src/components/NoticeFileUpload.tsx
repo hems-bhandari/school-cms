@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { X, Upload, FileText, Image as ImageIcon, File } from 'lucide-react'
+import { createStorageFileName, NOTICE_UPLOAD_TYPES, validateUpload } from '@/lib/uploads'
 
 export interface FileAttachment {
   url: string
@@ -46,13 +47,10 @@ export default function NoticeFileUpload({
   }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    setFiles(currentFiles => {
-      if (currentFiles.length + acceptedFiles.length > maxFiles) {
-        alert(`You can only upload up to ${maxFiles} files`)
-        return currentFiles
-      }
-      return currentFiles
-    })
+    if (files.length + acceptedFiles.length > maxFiles) {
+      alert(`You can only upload up to ${maxFiles} files`)
+      return
+    }
 
     setUploading(true)
     const supabase = createClient()
@@ -60,8 +58,9 @@ export default function NoticeFileUpload({
 
     try {
       for (const file of acceptedFiles) {
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const validationError = validateUpload(file, NOTICE_UPLOAD_TYPES, 10)
+        if (validationError) throw new Error(`${file.name}: ${validationError}`)
+        const fileName = createStorageFileName(file)
         
         const { data, error } = await supabase.storage
           .from(bucketName)
@@ -95,12 +94,15 @@ export default function NoticeFileUpload({
     } finally {
       setUploading(false)
     }
-  }, [bucketName, maxFiles, onFilesUploaded])
+  }, [bucketName, files.length, maxFiles, onFilesUploaded])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif'],
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp'],
+      'image/gif': ['.gif'],
       'application/pdf': ['.pdf']
     },
     multiple: true,
@@ -290,4 +292,3 @@ export default function NoticeFileUpload({
     </div>
   )
 }
-

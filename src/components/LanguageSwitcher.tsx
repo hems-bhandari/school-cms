@@ -7,8 +7,6 @@ import { Globe } from 'lucide-react'
 export function LanguageSwitcher() {
   const { locale, setLocale, t } = useLanguage()
 
-  console.log('LanguageSwitcher state:', { locale })
-
   const toggleLanguage = () => {
     setLocale(locale === 'en' ? 'ne' : 'en')
   }
@@ -18,7 +16,8 @@ export function LanguageSwitcher() {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="flex items-center gap-2"
+      className="school-language-button"
+      aria-label={locale === 'en' ? 'Switch language to Nepali' : 'Switch language to English'}
     >
       <Globe className="h-4 w-4" />
       <span>{locale === 'en' ? t('common.nepali') : t('common.english')}</span>

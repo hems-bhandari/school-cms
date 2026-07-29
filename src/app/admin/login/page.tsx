@@ -23,12 +23,12 @@ export default function AdminLogin() {
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       })
 
       if (error) {
-        setError(error.message)
+        setError('Unable to sign in with those credentials.')
       } else {
         router.push('/admin')
         router.refresh()

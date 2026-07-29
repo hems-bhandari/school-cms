@@ -32,6 +32,8 @@ export default function AdminStats() {
   // Load existing stats
   useEffect(() => {
     loadStats()
+    // The loader intentionally runs once against the initial client.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadStats = async () => {

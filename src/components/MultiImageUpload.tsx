@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { X, Upload, Image as ImageIcon } from 'lucide-react'
+import { createStorageFileName, IMAGE_UPLOAD_TYPES, validateUpload } from '@/lib/uploads'
 
 interface MultiImageUploadProps {
   onImagesUploaded: (urls: string[]) => void
@@ -34,8 +35,9 @@ export default function MultiImageUpload({
 
     try {
       for (const file of acceptedFiles) {
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const validationError = validateUpload(file, IMAGE_UPLOAD_TYPES, 10)
+        if (validationError) throw new Error(`${file.name}: ${validationError}`)
+        const fileName = createStorageFileName(file)
         
         const { data, error } = await supabase.storage
           .from(bucketName)
@@ -66,10 +68,13 @@ export default function MultiImageUpload({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.webp']
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp']
     },
     multiple: true,
-    disabled: uploading || images.length >= maxImages
+    disabled: uploading || images.length >= maxImages,
+    maxSize: 10 * 1024 * 1024,
   })
 
   const removeImage = (indexToRemove: number) => {

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import type { Database } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -30,13 +29,14 @@ export default function AdminAbout() {
   const [studentCounts, setStudentCounts] = useState<StudentCountRow[]>([])
   const [countsLoading, setCountsLoading] = useState(true)
   
-  const router = useRouter()
   const supabase = createClient()
 
   // Load existing content
   useEffect(() => {
     loadAboutContent()
     loadStudentCounts()
+    // The loaders intentionally run once against the initial client.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadAboutContent = async () => {

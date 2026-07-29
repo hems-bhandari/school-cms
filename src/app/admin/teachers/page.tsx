@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
 import ImageUpload from '@/components/ImageUpload'
+import { CalendarDays, Mail, Target } from 'lucide-react'
 
 type Teacher = Database['public']['Tables']['teachers']['Row']
 type TeacherInsert = Database['public']['Tables']['teachers']['Insert']
@@ -549,13 +550,13 @@ export default function AdminTeachers() {
                           
                           <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
                             {teacher.experience_years > 0 && (
-                              <span>📅 {teacher.experience_years} years exp.</span>
+                              <span className="inline-flex items-center gap-1"><CalendarDays size={14} aria-hidden="true" />{teacher.experience_years} years exp.</span>
                             )}
                             {teacher.email && (
-                              <span>📧 {teacher.email}</span>
+                              <span className="inline-flex items-center gap-1"><Mail size={14} aria-hidden="true" />{teacher.email}</span>
                             )}
                             {teacher.specialization_en && (
-                              <span>🎯 {teacher.specialization_en}</span>
+                              <span className="inline-flex items-center gap-1"><Target size={14} aria-hidden="true" />{teacher.specialization_en}</span>
                             )}
                             <span className="text-gray-400">Order: {teacher.display_order}</span>
                           </div>

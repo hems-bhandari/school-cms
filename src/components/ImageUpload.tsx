@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { createStorageFileName, IMAGE_UPLOAD_TYPES, validateUpload } from '@/lib/uploads'
 
 interface ImageUploadProps {
   currentImageUrl?: string | null
@@ -29,15 +30,9 @@ export default function ImageUpload({
     const file = acceptedFiles[0]
     if (!file) return
 
-    // Validate file size
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      setError(`File size must be less than ${maxSizeMB}MB`)
-      return
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file')
+    const validationError = validateUpload(file, IMAGE_UPLOAD_TYPES, maxSizeMB)
+    if (validationError) {
+      setError(validationError)
       return
     }
 
@@ -45,9 +40,7 @@ export default function ImageUpload({
     setError('')
 
     try {
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+      const fileName = createStorageFileName(file)
       const filePath = `${fileName}`
 
       // Upload file to Supabase Storage
@@ -78,10 +71,14 @@ export default function ImageUpload({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+      'image/webp': ['.webp']
     },
     multiple: false,
-    disabled: uploading
+    disabled: uploading,
+    maxSize: maxSizeMB * 1024 * 1024,
   })
 
   const handleRemoveImage = async () => {

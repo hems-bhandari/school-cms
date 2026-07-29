@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# School CMS
 
-## Getting Started
+A bilingual school website and content-management interface built with Next.js and Supabase.
 
-First, run the development server:
+## Requirements
+
+- A currently supported Node.js LTS release
+- A Supabase project
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`
+- `NEXT_PUBLIC_SITE_URL` in production
+
+Do not expose a Supabase service-role key to this application. Environment files are ignored by Git.
+
+## Development
 
 ```bash
+npm install
+npm run audit:prod
+npm run check
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in a browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database setup and administrator access
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run the numbered files in `sql-migrations` in order. Migration 12 replaces the old “any authenticated user is an admin” policies with an explicit server-managed role.
 
-## Learn More
+Before applying migration 12 to an existing deployment, assign each administrator this Auth app metadata using a trusted server or the Supabase dashboard:
 
-To learn more about Next.js, take a look at the following resources:
+```json
+{ "role": "admin" }
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Do not put the role in `user_metadata`; users can change that field themselves. After changing app metadata, the administrator must sign out and back in so the access token contains the new claim.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Disable public user registration in Supabase Auth unless the site intentionally needs it.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The browser only receives the public Supabase URL and anonymous key. All authorization is enforced by Row Level Security in the database; the route check is defense in depth, not the primary security boundary.

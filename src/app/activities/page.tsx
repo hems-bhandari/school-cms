@@ -7,9 +7,6 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import Image from 'next/image'
 import { 
   Calendar, 
-  Users, 
-  MapPin, 
-  Clock, 
   Star, 
   Eye,
   ChevronLeft,
@@ -318,7 +315,7 @@ export default function ActivitiesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="public-page min-h-screen">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
@@ -334,11 +331,11 @@ export default function ActivitiesPage() {
   const regularActivities = activities.filter(activity => !activity.is_featured)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="public-page min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
+      <section className="official-page-header">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
