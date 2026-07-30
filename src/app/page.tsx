@@ -46,7 +46,7 @@ export default function Home() {
       const supabase = createClient()
       const [{ data }, { count: teachersCount }, { count: activitiesCount }] = await Promise.all([
         supabase.from('footer').select('*').eq('is_active', true).single(),
-        supabase.from('teachers').select('*', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('teachers').select('*', { count: 'exact', head: true }).eq('is_active', true).eq('is_academic', true),
         supabase.from('activities').select('*', { count: 'exact', head: true }).eq('is_published', true),
       ])
 

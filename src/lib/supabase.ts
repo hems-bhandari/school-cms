@@ -80,6 +80,8 @@ export type Database = {
           specialization_ne: string | null
           display_order: number
           is_active: boolean
+          is_academic: boolean
+          report_level: string | null
           created_at: string
           updated_at: string
         }
@@ -101,6 +103,8 @@ export type Database = {
           specialization_ne?: string | null
           display_order?: number
           is_active?: boolean
+          is_academic?: boolean
+          report_level?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -122,6 +126,8 @@ export type Database = {
           specialization_ne?: string | null
           display_order?: number
           is_active?: boolean
+          is_academic?: boolean
+          report_level?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -130,9 +130,9 @@ export default function ReportingDashboard() {
       supabase.from('subject_monthly_reports').select('*').order('submitted_at', { ascending: false }),
       supabase.from('class_monthly_reports').select('*').order('submitted_at', { ascending: false }),
       supabase.from('incharge_monthly_reports').select('*').order('submitted_at', { ascending: false }),
-      supabase.from('teachers').select('id, name_ne, position_ne, report_level').order('display_order'),
+      supabase.from('teachers').select('id, name_ne, position_ne, report_level, is_academic').eq('is_academic', true).order('display_order'),
       supabase.from('school_classes').select('id, name_ne, level, class_teacher_id').order('grade_number'),
-      supabase.from('school_subjects').select('id, subject_code, name_ne').order('id'),
+      supabase.from('school_subjects').select('id, subject_code, name_ne').eq('is_active', true).order('id'),
       supabase.from('class_subject').select('id, class_id, subject_id, teacher_id').eq('is_active', true),
       supabase.from('teacher_report_access').select('teacher_id, teacher_code').order('teacher_id'),
     ])

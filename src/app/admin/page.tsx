@@ -76,7 +76,7 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [aboutConfigured, setAboutConfigured] = useState(false)
   const [statsCount, setStatsCount] = useState(0)
-  const [teachers, setTeachers] = useState<Array<{ id: number; is_active: boolean }>>([])
+  const [teachers, setTeachers] = useState<Array<{ id: number; is_active: boolean; is_academic: boolean }>>([])
   const [notices, setNotices] = useState<Array<{ id: number; is_published: boolean }>>([])
   const [committee, setCommittee] = useState<Array<{ id: number; is_active: boolean }>>([])
   const [activities, setActivities] = useState<Array<{ id: number; is_published: boolean }>>([])
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
       const [aboutResult, statsResult, teachersResult, noticesResult, committeeResult, activitiesResult] = await Promise.all([
         supabase.from('about').select('id').limit(1).maybeSingle(),
         supabase.from('stats').select('id', { count: 'exact', head: true }),
-        supabase.from('teachers').select('id, is_active'),
+        supabase.from('teachers').select('id, is_active, is_academic'),
         supabase.from('notices').select('id, is_published'),
         supabase.from('committee').select('id, is_active'),
         supabase.from('activities').select('id, is_published'),
@@ -135,7 +135,8 @@ export default function AdminDashboard() {
 
   if (!user) return null
 
-  const activeTeachers = teachers.filter((teacher) => teacher.is_active).length
+  const academicTeachers = teachers.filter((teacher) => teacher.is_academic)
+  const activeTeachers = academicTeachers.filter((teacher) => teacher.is_active).length
   const activeCommittee = committee.filter((member) => member.is_active).length
   const publishedActivities = activities.filter((activity) => activity.is_published).length
   const publishedNotices = notices.filter((notice) => notice.is_published).length
@@ -176,7 +177,7 @@ export default function AdminDashboard() {
           <div className="admin-overview-grid">
             <OverviewItem icon={<Info />} label={t('admin.about')} value={aboutConfigured ? 'Ready' : 'Missing'} detail={aboutConfigured ? 'School profile configured' : 'School profile needs content'} warning={!aboutConfigured} />
             <OverviewItem icon={<BarChart3 />} label={t('admin.stats')} value={statsCount} detail="Published statistics" warning={statsCount === 0} />
-            <OverviewItem icon={<Users />} label={t('admin.teachers')} value={activeTeachers} detail={`${activeTeachers} active of ${teachers.length} total`} warning={activeTeachers === 0} />
+            <OverviewItem icon={<Users />} label={t('admin.teachers')} value={activeTeachers} detail={`${activeTeachers} active of ${academicTeachers.length} academic staff`} warning={activeTeachers === 0} />
             <OverviewItem icon={<Building2 />} label="Committees" value={activeCommittee} detail="Active committee members" warning={activeCommittee === 0} />
             <OverviewItem icon={<CalendarDays />} label="Activities" value={publishedActivities} detail="Published activities" warning={publishedActivities === 0} />
             <OverviewItem icon={<Megaphone />} label="Notices" value={publishedNotices} detail="Published notices" warning={publishedNotices === 0} />

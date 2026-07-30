@@ -6,7 +6,7 @@ import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2 } from 'lucide
 import { createClient } from '@/lib/supabase-client'
 import { reportDefinitions, type FieldSource, type ReportField, type ReportKind } from '@/lib/monthly-report-forms'
 
-type Teacher = { id: number; name_ne: string; position_ne: string; report_level: string | null }
+type Teacher = { id: number; name_ne: string; position_ne: string; report_level: string | null; is_academic: boolean }
 type SchoolClass = { id: number; grade_number: number; name_ne: string; level: string; class_teacher_id: number | null }
 type Subject = { id: number; subject_code: string; name_ne: string }
 type Assignment = { class_id: number; subject_id: number; teacher_id: number }
@@ -87,7 +87,7 @@ export function MonthlyReportForm({ kind }: { kind: ReportKind }) {
     async function loadMasters() {
       const supabase = createClient()
       const [teachers, classes, subjects, assignments, months] = await Promise.all([
-        supabase.from('teachers').select('id, name_ne, position_ne, report_level').eq('is_active', true).order('display_order'),
+        supabase.from('teachers').select('id, name_ne, position_ne, report_level, is_academic').eq('is_active', true).eq('is_academic', true).order('display_order'),
         supabase.from('school_classes').select('id, grade_number, name_ne, level, class_teacher_id').eq('is_active', true).order('grade_number'),
         supabase.from('school_subjects').select('id, subject_code, name_ne').eq('is_active', true).order('id'),
         supabase.from('class_subject').select('class_id, subject_id, teacher_id').eq('is_active', true),
@@ -115,10 +115,10 @@ export function MonthlyReportForm({ kind }: { kind: ReportKind }) {
   const optionsFor = (source?: FieldSource, nested = false) => {
     if (!source) return []
     if (source === 'sessions') {
-      return [...new Set(masters.months.map((month) => month.session_year))].map((year) => ({ value: String(year), label: String(year) }))
+      return [2082, 2083, 2084, 2085].map((year) => ({ value: String(year), label: String(year) }))
     }
     if (source === 'months') {
-      return masters.months.filter((month) => !selectedSession || month.session_year === selectedSession).map((month) => ({ value: month.code, label: `${month.name_ne} · ${month.code}` }))
+      return masters.months.filter((month) => month.session_year >= 2082 && month.session_year <= 2085 && (!selectedSession || month.session_year === selectedSession)).map((month) => ({ value: month.code, label: `${month.name_ne} · ${month.code}` }))
     }
     if (source === 'teachers') return masters.teachers.map((teacher) => ({ value: String(teacher.id), label: `${teacher.name_ne} — ${teacher.position_ne}` }))
     if (source === 'classes') {

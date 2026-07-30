@@ -70,6 +70,7 @@ export default function AdminTeachers() {
       specialization_ne: '',
       display_order: teachers.length + 1,
       is_active: true,
+      is_academic: true,
     })
     setError('')
     setSuccess('')
@@ -99,6 +100,7 @@ export default function AdminTeachers() {
         specialization_ne: editingTeacher.specialization_ne?.trim() || null,
         display_order: editingTeacher.display_order || 1,
         is_active: editingTeacher.is_active ?? true,
+        is_academic: editingTeacher.is_academic ?? true,
         updated_at: new Date().toISOString(),
       }
 
@@ -456,7 +458,8 @@ export default function AdminTeachers() {
                   </div>
                   
                   {/* Active Status */}
-                  <div className="flex items-center">
+                  <div className="flex flex-wrap gap-6">
+                    <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="is_active"
@@ -467,6 +470,19 @@ export default function AdminTeachers() {
                     <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
                       Active (visible on public page)
                     </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="is_academic"
+                        checked={editingTeacher.is_academic ?? true}
+                        onChange={(e) => setEditingTeacher({...editingTeacher, is_academic: e.target.checked})}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="is_academic" className="ml-2 block text-sm text-gray-700">
+                        Academic/teaching staff (included in report forms)
+                      </label>
+                    </div>
                   </div>
                 </div>
                 
@@ -536,6 +552,9 @@ export default function AdminTeachers() {
                                 : 'bg-gray-100 text-gray-800'
                             }`}>
                               {teacher.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            <span className={`px-2 py-1 text-xs rounded-full ${teacher.is_academic ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>
+                              {teacher.is_academic ? 'Academic' : 'Non-academic'}
                             </span>
                           </div>
                           <p className="text-gray-600" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>

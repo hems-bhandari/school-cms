@@ -134,6 +134,7 @@ export default function TeachersPage() {
         .from('teachers')
         .select('*')
         .eq('is_active', true)
+        .eq('is_academic', true)
         .order('display_order')
 
       setTeachers(data || [])
