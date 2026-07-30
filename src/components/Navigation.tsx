@@ -44,6 +44,7 @@ export function Navigation() {
     { href: '/activities', label: t('nav.activities') },
     { href: '/notices', label: t('nav.notices') },
     { href: '/documents', label: t('nav.documents') },
+    { href: '/forms', label: locale === 'en' ? 'Reports' : 'प्रतिवेदन' },
   ]
 
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)

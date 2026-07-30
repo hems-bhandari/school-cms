@@ -11,6 +11,7 @@ import {
   CalendarDays,
   CheckCircle2,
   CircleAlert,
+  ClipboardList,
   FileText,
   FolderOpen,
   Globe2,
@@ -199,6 +200,7 @@ export default function AdminDashboard() {
             <ModuleLink href="/admin/notices" icon={<Megaphone />} title="Notices" description="Publish announcements and notices" />
             <ModuleLink href="/admin/documents" icon={<FolderOpen />} title="Documents" description="Manage forms, reports and resources" />
             <ModuleLink href="/admin/footer" icon={<Settings />} title="School information" description="Update contact details, links and logo" />
+            <ModuleLink href="/admin/dashboard" icon={<ClipboardList />} title="Monthly reporting" description="Review teacher responses and the eight academic KPIs" />
           </div>
         </section>
       </main>
