@@ -1325,6 +1325,17 @@ html {
 .response-item dl div { display: grid; gap: 0.25rem; border-bottom: 1px solid #eceef0; padding: 0.7rem 0; }
 .response-item dt { color: var(--school-muted); font-size: 0.7rem; }
 .response-item dd { color: #27364a; font-size: 0.78rem; line-height: 1.55; white-space: pre-line; }
+.response-item__delete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.8rem; border-top: 1px solid #ead3d3; background: #fffafa; padding: 0.85rem 1rem; }
+.response-item__delete > div { display: grid; gap: 0.16rem; }
+.response-item__delete strong { color: #762e2e; font-size: 0.73rem; }
+.response-item__delete span { color: #765858; font-size: 0.66rem; line-height: 1.45; }
+.response-item__delete button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 0.38rem; border: 1px solid #b53c3c; padding: 0.45rem 0.65rem; color: #9e3030; font-size: 0.69rem; font-weight: 760; }
+.response-item__delete button:hover { background: #a93636; color: white; }
+.response-item__delete button:disabled { cursor: not-allowed; opacity: 0.5; }
+.response-item__delete button svg { width: 14px; height: 14px; }
+.response-action-message { margin-bottom: 0.8rem; border-left: 3px solid; padding: 0.65rem 0.8rem; font-size: 0.73rem; }
+.response-action-message--success { border-color: #3d8057; background: #edf8f1; color: #285c3c; }
+.response-action-message--error { border-color: #b53c3c; background: #fff0f0; color: #842e2e; }
 .report-dashboard__empty { border: 1px dashed #c8cdd4; padding: 2rem; color: var(--school-muted); text-align: center; }
 .master-summary { display: grid; gap: 0.7rem; }
 .master-summary article { display: flex; align-items: center; gap: 0.75rem; border: 1px solid var(--school-border); background: white; padding: 1rem; }

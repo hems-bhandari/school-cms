@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase-client'
 import { reportDefinitions, type ReportField } from '@/lib/monthly-report-forms'
 
 type Row = Record<string, unknown>
+type ResponseType = 'subject' | 'class' | 'incharge'
 type DashboardData = {
   metrics: Record<string, Row[]>
   subjectReports: Row[]
@@ -54,12 +55,14 @@ function displayValue(value: unknown, key: string, lookups: { teachers: Map<stri
   return String(value)
 }
 
-function ResponseList({ rows, lookups }: { rows: Row[]; lookups: { teachers: Map<string, string>; classes: Map<string, string>; subjects: Map<string, string> } }) {
+function ResponseList({ rows, lookups, responseType, deletingKey, onDelete }: { rows: Row[]; lookups: { teachers: Map<string, string>; classes: Map<string, string>; subjects: Map<string, string> }; responseType: ResponseType; deletingKey: string; onDelete: (responseType: ResponseType, row: Row, teacher: string) => void }) {
   if (!rows.length) return <p className="report-dashboard__empty">यस छनोटमा प्रतिवेदन छैन।</p>
   return <div className="response-list">{rows.map((row) => {
     const payload = (row.payload || {}) as Row
     const teacher = lookups.teachers.get(String(row.teacher_id)) || `Teacher #${row.teacher_id}`
-    return <details className="response-item" key={String(row.id)}><summary><span><strong>{teacher}</strong><small>{String(row.month_code)} · {new Date(String(row.submitted_at)).toLocaleDateString()}</small></span><ChevronDown aria-hidden="true" /></summary><dl>{Object.entries(payload).filter(([key]) => key !== 'teacher_code').map(([key, value]) => <div key={key}><dt>{fieldLabels[key] || key}</dt><dd>{displayValue(value, key, lookups)}</dd></div>)}</dl></details>
+    const rowId = String(row.id)
+    const isDeleting = deletingKey === `${responseType}:${rowId}`
+    return <details className="response-item" key={rowId}><summary><span><strong>{teacher}</strong><small>{String(row.month_code)} · {new Date(String(row.submitted_at)).toLocaleDateString()}</small></span><ChevronDown aria-hidden="true" /></summary><dl>{Object.entries(payload).filter(([key]) => key !== 'teacher_code').map(([key, value]) => <div key={key}><dt>{fieldLabels[key] || key}</dt><dd>{displayValue(value, key, lookups)}</dd></div>)}</dl><div className="response-item__delete"><div><strong>यो प्रतिवेदन हटाउनुहोस्</strong><span>हटाएपछि शिक्षकले यही महिना र कक्षाको प्रतिवेदन फेरि बुझाउन सक्नेछन्।</span></div><button type="button" disabled={isDeleting} onClick={() => onDelete(responseType, row, teacher)}><Trash2 aria-hidden="true" />{isDeleting ? 'हटाउँदैछ…' : 'प्रतिवेदन हटाउनुहोस्'}</button></div></details>
   })}</div>
 }
 
@@ -182,7 +185,9 @@ export default function ReportingDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [month, setMonth] = useState('all')
-  const [responseType, setResponseType] = useState<'subject' | 'class' | 'incharge'>('subject')
+  const [responseType, setResponseType] = useState<ResponseType>('subject')
+  const [deletingResponseKey, setDeletingResponseKey] = useState('')
+  const [responseActionMessage, setResponseActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   async function loadDashboard(showLoader = true) {
     if (showLoader) setLoading(true)
@@ -212,6 +217,30 @@ export default function ReportingDashboard() {
 
   useEffect(() => { loadDashboard() }, [])
 
+  async function deleteResponse(reportType: ResponseType, row: Row, teacher: string) {
+    const responseId = String(row.id)
+    const monthCode = String(row.month_code)
+    const firstConfirmation = window.confirm(`${teacher} को ${monthCode} को प्रतिवेदन हटाउन चाहनुहुन्छ?`)
+    if (!firstConfirmation) return
+    const finalConfirmation = window.confirm('अन्तिम पुष्टि: यो प्रतिवेदन स्थायी रूपमा हट्नेछ। यो कार्य फिर्ता गर्न सकिँदैन। के तपाईं पूर्ण रूपमा निश्चित हुनुहुन्छ?')
+    if (!finalConfirmation) return
+
+    setDeletingResponseKey(`${reportType}:${responseId}`)
+    setResponseActionMessage(null)
+    const { data: deleted, error: deleteError } = await createClient().rpc('delete_monthly_report', {
+      p_report_type: reportType,
+      p_report_id: Number(responseId),
+    })
+    if (deleteError || !deleted) {
+      setResponseActionMessage({ type: 'error', text: deleteError?.message || 'प्रतिवेदन भेटिएन वा हटाउन सकिएन।' })
+      setDeletingResponseKey('')
+      return
+    }
+    await loadDashboard(false)
+    setDeletingResponseKey('')
+    setResponseActionMessage({ type: 'success', text: `${teacher} को ${monthCode} को प्रतिवेदन हटाइयो।` })
+  }
+
   const months = useMemo(() => [...new Set([...data.subjectReports, ...data.classReports, ...data.inchargeReports].map((row) => String(row.month_code)))].sort().reverse(), [data])
   const filterRows = (rows: Row[]) => month === 'all' ? rows : rows.filter((row) => row.month_code === month)
   const lookups = useMemo(() => ({
@@ -226,7 +255,7 @@ export default function ReportingDashboard() {
     {error && <div className="report-notice report-notice--error"><div><strong>डेटा उपलब्ध भएन</strong><span>{error}</span><span>Supabase मा migration 13 लागू भएको जाँच गर्नुहोस्।</span></div></div>}
     {!loading && !error && <>
       <section><div className="admin-section-heading"><div><p>KPI views</p><h2>मुख्य मासिक सूचकहरू</h2></div><span className="report-dashboard__count">८ views</span></div><div className="metric-grid">{metricDefinitions.map((metric) => { const rows = filterRows(data.metrics[metric.key] || []); return <article className="metric-card" key={metric.key}><header><div><h3>{metric.title}</h3><p>{metric.description}</p></div><strong>{rows.length}</strong></header><div className="metric-table-wrap"><table><thead><tr>{metric.columns.map(([, label]) => <th key={label}>{label}</th>)}</tr></thead><tbody>{rows.length ? rows.slice(0, 12).map((row, index) => <tr key={index}>{metric.columns.map(([key]) => <td key={key}>{row[key] === null ? '—' : String(row[key] ?? '—')}</td>)}</tr>) : <tr><td colSpan={metric.columns.length}>डेटा छैन</td></tr>}</tbody></table></div></article> })}</div></section>
-      <section className="report-dashboard__section"><div className="admin-section-heading"><div><p>Responses</p><h2>बुझाइएका प्रतिवेदन</h2></div></div><div className="response-tabs">{([['subject', 'विषय शिक्षक', data.subjectReports.length], ['class', 'कक्षा शिक्षक', data.classReports.length], ['incharge', 'तह सयोजक', data.inchargeReports.length]] as const).map(([key, label, count]) => <button type="button" className={responseType === key ? 'is-active' : ''} onClick={() => setResponseType(key)} key={key}>{label}<span>{count}</span></button>)}</div><ResponseList rows={filterRows(reportRows)} lookups={lookups} /></section>
+      <section className="report-dashboard__section"><div className="admin-section-heading"><div><p>Responses</p><h2>बुझाइएका प्रतिवेदन</h2></div></div>{responseActionMessage && <p className={`response-action-message response-action-message--${responseActionMessage.type}`}>{responseActionMessage.text}</p>}<div className="response-tabs">{([['subject', 'विषय शिक्षक', data.subjectReports.length], ['class', 'कक्षा शिक्षक', data.classReports.length], ['incharge', 'तह सयोजक', data.inchargeReports.length]] as const).map(([key, label, count]) => <button type="button" className={responseType === key ? 'is-active' : ''} onClick={() => { setResponseType(key); setResponseActionMessage(null) }} key={key}>{label}<span>{count}</span></button>)}</div><ResponseList rows={filterRows(reportRows)} lookups={lookups} responseType={responseType} deletingKey={deletingResponseKey} onDelete={deleteResponse} /></section>
       <section className="report-dashboard__section"><div className="admin-section-heading"><div><p>Master data</p><h2>Fixed list तयारी</h2></div></div><div className="master-summary"><article><BookOpen /><span><strong>{data.teachers.length}</strong> शिक्षक</span></article><article><ClipboardList /><span><strong>{data.classes.length}</strong> कक्षा</span></article><article><Database /><span><strong>{data.subjects.length}</strong> विषय</span></article><article><Database /><span><strong>{data.assignments.length}</strong> class_subject assignment</span></article></div><MasterSetup data={data} reload={() => loadDashboard(false)} /></section>
     </>}
   </main></div>
