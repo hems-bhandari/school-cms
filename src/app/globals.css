@@ -1288,7 +1288,40 @@ html {
 .report-dashboard__filter button { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid #8ca0b6; padding: 0.5rem 0.7rem; color: white; font-size: 0.75rem; font-weight: 700; }
 .report-dashboard__content { padding-block: 3rem 5rem; }
 .report-dashboard__section { margin-top: 4rem; }
+.report-dashboard__section--details { margin-top: 1.25rem; }
 .report-dashboard__count { border: 1px solid var(--school-border); background: white; padding: 0.35rem 0.6rem; color: var(--school-muted); font-size: 0.72rem; }
+.dashboard-visual-grid { display: grid; gap: 1rem; }
+.dashboard-visual { min-width: 0; overflow: hidden; border: 1px solid var(--school-border); background: white; box-shadow: 0 8px 22px rgb(15 39 66 / 0.035); }
+.dashboard-visual > header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0.8rem; border-bottom: 1px solid var(--school-border); padding: 0.95rem 1rem; }
+.dashboard-visual > header > div:first-child { min-width: 0; }
+.dashboard-visual > header > div:first-child > span { color: #9b7627; font-size: 0.59rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.dashboard-visual h3 { margin-top: 0.16rem; color: var(--school-navy); font-family: Georgia, 'Times New Roman', serif; font-size: 1.02rem; }
+.dashboard-visual header p { margin-top: 0.2rem; color: var(--school-muted); font-size: 0.67rem; line-height: 1.45; }
+.dashboard-visual__actions { display: flex; align-items: center; gap: 0.45rem; }
+.dashboard-visual__actions select { min-height: 34px; border: 1px solid #c6ccd3; background: white; padding: 0.35rem 0.5rem; color: var(--school-navy); font-size: 0.68rem; }
+.dashboard-visual__actions button { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; gap: 0.35rem; border: 1px solid var(--school-navy); padding: 0.35rem 0.58rem; color: var(--school-navy); font-size: 0.67rem; font-weight: 760; }
+.dashboard-visual__actions button:hover { background: var(--school-navy); color: white; }
+.dashboard-visual__actions button:disabled { cursor: wait; opacity: 0.55; }
+.dashboard-visual__actions button svg { width: 13px; height: 13px; }
+.dashboard-visual__canvas { width: 100%; min-height: 280px; }
+.dashboard-visual__empty { display: flex; align-items: center; gap: 0.45rem; border-top: 0; padding: 0 0.85rem 0.7rem; color: var(--school-muted); font-size: 0.66rem; }
+.dashboard-visual__empty svg { width: 14px; height: 14px; color: #b4bbc4; }
+.dashboard-visual--empty { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; box-shadow: none; }
+.dashboard-visual--empty > header { border: 0; padding: 0.65rem 0.8rem; }
+.dashboard-visual--empty > header > div:first-child > span,
+.dashboard-visual--empty header p { display: none; }
+.dashboard-visual--empty h3 { margin: 0; font-family: inherit; font-size: 0.76rem; }
+.dashboard-visual--empty .dashboard-visual__empty { padding: 0.65rem 0.8rem; white-space: nowrap; }
+.kpi-details { border: 1px solid var(--school-border); background: #eef1f4; }
+.kpi-details > summary { display: flex; cursor: pointer; list-style: none; align-items: center; justify-content: space-between; gap: 1rem; background: white; padding: 0.85rem 1rem; }
+.kpi-details > summary::-webkit-details-marker { display: none; }
+.kpi-details > summary > span:first-child { display: grid; gap: 0.12rem; }
+.kpi-details > summary small { color: #9b7627; font-size: 0.59rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.kpi-details > summary strong { color: var(--school-navy); font-size: 0.8rem; }
+.kpi-details > summary > span:last-child { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--school-muted); font-size: 0.68rem; }
+.kpi-details > summary svg { width: 15px; height: 15px; transition: transform 160ms ease; }
+.kpi-details[open] > summary svg { transform: rotate(180deg); }
+.kpi-details > .metric-grid { border-top: 1px solid var(--school-border); padding: 1rem; }
 .metric-grid { display: grid; gap: 1rem; }
 .metric-card { min-width: 0; border: 1px solid var(--school-border); background: white; }
 .metric-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--school-border); padding: 1rem 1.1rem; }
@@ -1402,6 +1435,8 @@ html {
 
 @media (min-width: 900px) {
   .report-dashboard__header { grid-template-columns: minmax(0, 1fr) 320px; align-items: end; }
+  .dashboard-visual-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-visual-grid > :first-child { grid-column: 1 / -1; }
   .master-summary { grid-template-columns: repeat(4, 1fr); }
 }
 
