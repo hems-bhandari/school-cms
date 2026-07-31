@@ -1174,20 +1174,6 @@ html {
 .report-header { max-width: 780px; padding-block: 2.2rem 2.5rem; }
 .report-header h1 { font-size: clamp(2rem, 4vw, 3.4rem); }
 
-.report-auto-panel {
-  border: 1px solid #cbd3dd;
-  background: #eef3f8;
-  padding: 1.15rem;
-}
-
-.report-auto-panel > div { display: flex; align-items: center; gap: 0.65rem; }
-.report-auto-panel > div span { border-radius: 999px; background: var(--school-navy); padding: 0.2rem 0.5rem; color: white; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.08em; }
-.report-auto-panel > div strong { color: var(--school-navy); font-size: 0.87rem; }
-.report-auto-panel dl { display: grid; gap: 0.7rem; margin-top: 1rem; }
-.report-auto-panel dl div { border-left: 2px solid #aebdcd; padding-left: 0.7rem; }
-.report-auto-panel dt { color: var(--school-muted); font-size: 0.7rem; }
-.report-auto-panel dd { margin-top: 0.2rem; color: var(--school-navy); font-size: 1rem; font-weight: 800; }
-
 .monthly-report-form { display: grid; gap: 1rem; margin-top: 1rem; }
 .report-section { border: 1px solid #d9d5cb; background: white; }
 .report-section__heading { border-bottom: 1px solid #e2ded5; padding: 1.25rem 1.35rem; }
@@ -1262,7 +1248,6 @@ html {
 
 @media (min-width: 640px) {
   .forms-index__grid { grid-template-columns: repeat(3, 1fr); }
-  .report-auto-panel dl { grid-template-columns: repeat(4, 1fr); }
   .report-fields-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .report-field--wide { grid-column: 1 / -1; }
   .report-checkbox-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1271,7 +1256,6 @@ html {
 
 @media (min-width: 920px) {
   .report-page { padding-block: 2.5rem 6rem; }
-  .report-auto-panel { position: sticky; top: 96px; z-index: 5; }
   .report-checkbox-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
@@ -1354,17 +1338,55 @@ html {
 .master-table select,
 .master-table input { min-height: 34px; border: 1px solid #c5cbd2; background: white; padding: 0.35rem 0.5rem; color: var(--school-ink); font-size: 0.74rem; }
 .master-setup__message { margin-top: 1rem; border-left: 3px solid var(--school-gold); background: #fff8e8; padding: 0.7rem 0.85rem; color: #6b5018; font-size: 0.75rem; }
-.master-assignment-add { display: grid; gap: 0.5rem; border-block: 1px solid var(--school-border); background: #f8f9fa; padding: 0.8rem 1rem; }
-.master-assignment-add button { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; background: var(--school-navy); padding: 0.5rem 0.7rem; color: white; font-size: 0.72rem; font-weight: 750; }
-.master-assignment-add button svg,
-.master-delete svg { width: 14px; }
-.master-delete { display: grid; width: 30px; height: 30px; place-items: center; color: #a43636; }
+.assignment-editor__teacher { display: grid; gap: 0.55rem; border-block: 1px solid var(--school-border); background: #f8f9fa; padding: 1rem; }
+.assignment-editor__teacher label,
+.assignment-editor__add-grade label { color: var(--school-navy); font-size: 0.72rem; font-weight: 780; }
+.assignment-editor__teacher select { width: 100%; min-height: 44px; }
+.assignment-editor__summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.55rem; color: var(--school-muted); font-size: 0.73rem; }
+.assignment-editor__summary strong { color: var(--school-navy); }
+.assignment-editor__summary em { border: 1px solid #d7b96f; background: #fff7df; padding: 0.22rem 0.45rem; color: #6b5018; font-size: 0.66rem; font-style: normal; font-weight: 750; }
+.assignment-editor__add-grade { display: grid; gap: 0.6rem; border-bottom: 1px solid var(--school-border); padding: 0.9rem 1rem; }
+.assignment-editor__add-grade > div { display: grid; gap: 0.15rem; }
+.assignment-editor__add-grade span { color: var(--school-muted); font-size: 0.66rem; line-height: 1.45; }
+.assignment-editor__add-grade button,
+.assignment-editor__save button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 0.4rem; background: var(--school-navy); padding: 0.55rem 0.85rem; color: white; font-size: 0.72rem; font-weight: 760; }
+.assignment-editor__add-grade button:disabled,
+.assignment-editor__save button:disabled { cursor: not-allowed; opacity: 0.45; }
+.assignment-editor__add-grade button svg,
+.assignment-editor__save button svg,
+.assignment-grade-card header button svg,
+.assignment-editor__empty svg { width: 15px; height: 15px; }
+.assignment-grade-grid { display: grid; gap: 0.9rem; background: #f4f6f8; padding: 1rem; }
+.assignment-grade-card { border: 1px solid var(--school-border); background: white; box-shadow: 0 1px 0 rgb(15 39 66 / 0.04); }
+.assignment-grade-card header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--school-border); background: #faf9f5; padding: 0.7rem 0.8rem; }
+.assignment-grade-card header small { color: var(--school-muted); font-size: 0.62rem; font-weight: 720; letter-spacing: 0.06em; text-transform: uppercase; }
+.assignment-grade-card header h4 { margin-top: 0.08rem; color: var(--school-navy); font-size: 0.88rem; }
+.assignment-grade-card header span { display: block; margin-top: 0.12rem; color: var(--school-muted); font-size: 0.64rem; }
+.assignment-grade-card header button { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; color: #a43636; }
+.assignment-grade-card header button:hover { background: #faeaea; }
+.assignment-subjects { display: grid; gap: 0.45rem; padding: 0.75rem; }
+.assignment-subjects > p { color: var(--school-muted); font-size: 0.7rem; }
+.assignment-subjects label { display: flex; min-width: 0; align-items: center; gap: 0.55rem; border: 1px solid #d9dee4; padding: 0.55rem 0.6rem; color: var(--school-ink); cursor: pointer; font-size: 0.72rem; line-height: 1.35; }
+.assignment-subjects label:hover { border-color: #9eabb8; background: #f8fafb; }
+.assignment-subjects label:has(input:checked) { border-color: #9f7b2e; background: #fff8e8; color: var(--school-navy); font-weight: 700; }
+.master-table .assignment-subjects input { width: 15px; height: 15px; min-height: 0; flex: 0 0 auto; border: 0; padding: 0; accent-color: var(--school-navy); }
+.assignment-editor__empty { display: grid; min-height: 150px; place-items: center; align-content: center; gap: 0.55rem; border: 1px dashed #c5cbd2; background: #fbfcfd; padding: 1.5rem; color: var(--school-muted); text-align: center; }
+.assignment-editor__empty svg { color: var(--school-gold); }
+.assignment-editor__empty strong { color: var(--school-navy); font-size: 0.82rem; }
+.assignment-editor__empty span { max-width: 430px; font-size: 0.71rem; line-height: 1.55; }
+.assignment-editor__save { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.8rem; border-top: 1px solid var(--school-border); background: white; padding: 0.85rem 1rem; }
+.assignment-editor__save span { margin-right: auto; color: var(--school-muted); font-size: 0.69rem; }
 
 @media (min-width: 640px) {
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .master-summary { grid-template-columns: repeat(2, 1fr); }
   .response-item dl { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; }
-  .master-assignment-add { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+  .assignment-editor__teacher { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .assignment-editor__teacher > label { grid-column: 1 / -1; }
+  .assignment-editor__add-grade { grid-template-columns: minmax(0, 1fr) minmax(180px, 0.55fr) auto; align-items: end; }
+  .assignment-grade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .assignment-subjects { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .assignment-subjects > p { grid-column: 1 / -1; }
 }
 
 @media (min-width: 900px) {

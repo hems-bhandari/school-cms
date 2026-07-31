@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, BarChart3, BookOpen, ChevronDown, ClipboardList, Database, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, BarChart3, BookOpen, ChevronDown, ClipboardList, Database, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
 import { Navigation } from '@/components/Navigation'
 import { createClient } from '@/lib/supabase-client'
 import { reportDefinitions, type ReportField } from '@/lib/monthly-report-forms'
@@ -64,10 +64,12 @@ function ResponseList({ rows, lookups }: { rows: Row[]; lookups: { teachers: Map
 }
 
 function MasterSetup({ data, reload }: { data: DashboardData; reload: () => Promise<void> }) {
-  const [newClass, setNewClass] = useState('')
-  const [newSubject, setNewSubject] = useState('')
-  const [newTeacher, setNewTeacher] = useState('')
   const [message, setMessage] = useState('')
+  const [assignmentTeacher, setAssignmentTeacher] = useState('')
+  const [gradeToAdd, setGradeToAdd] = useState('')
+  const [assignmentDraft, setAssignmentDraft] = useState<Record<string, string[]>>({})
+  const [assignmentDirty, setAssignmentDirty] = useState(false)
+  const [savingAssignments, setSavingAssignments] = useState(false)
 
   const updateClassTeacher = async (classId: unknown, teacherId: string) => {
     const { error } = await createClient().from('school_classes').update({ class_teacher_id: teacherId ? Number(teacherId) : null }).eq('id', classId)
@@ -89,28 +91,89 @@ function MasterSetup({ data, reload }: { data: DashboardData; reload: () => Prom
     if (!error) await reload()
   }
 
-  const addAssignment = async () => {
-    if (!newClass || !newSubject || !newTeacher) { setMessage('कक्षा, विषय र शिक्षक तीनै छान्नुहोस्।'); return }
-    const { error } = await createClient().from('class_subject').insert({ class_id: Number(newClass), subject_id: Number(newSubject), teacher_id: Number(newTeacher) })
-    setMessage(error ? error.message : 'class_subject assignment थपियो।')
-    if (!error) { setNewClass(''); setNewSubject(''); setNewTeacher(''); await reload() }
+  const draftForTeacher = (teacherId: string) => {
+    const draft: Record<string, string[]> = {}
+    data.assignments.filter((item) => String(item.teacher_id) === teacherId).forEach((item) => {
+      const classId = String(item.class_id)
+      draft[classId] = [...(draft[classId] || []), String(item.subject_id)]
+    })
+    return draft
   }
 
-  const removeAssignment = async (id: unknown) => {
-    const { error } = await createClient().from('class_subject').delete().eq('id', id)
-    setMessage(error ? error.message : 'Assignment हटाइयो।')
-    if (!error) await reload()
+  const selectAssignmentTeacher = (teacherId: string) => {
+    if (assignmentDirty && !window.confirm('सुरक्षित नगरेका assignment परिवर्तन हटाउने?')) return
+    setAssignmentTeacher(teacherId)
+    setAssignmentDraft(teacherId ? draftForTeacher(teacherId) : {})
+    setGradeToAdd('')
+    setAssignmentDirty(false)
+    setMessage('')
   }
 
-  const teacherName = (id: unknown) => String(data.teachers.find((item) => item.id === id)?.name_ne || '—')
-  const className = (id: unknown) => String(data.classes.find((item) => item.id === id)?.name_ne || '—')
-  const subjectName = (id: unknown) => String(data.subjects.find((item) => item.id === id)?.name_ne || '—')
+  const addGrade = () => {
+    if (!gradeToAdd) return
+    setAssignmentDraft((current) => ({ ...current, [gradeToAdd]: [] }))
+    setGradeToAdd('')
+    setAssignmentDirty(true)
+  }
+
+  const removeGrade = (classId: string) => {
+    setAssignmentDraft((current) => {
+      const next = { ...current }
+      delete next[classId]
+      return next
+    })
+    setAssignmentDirty(true)
+  }
+
+  const toggleSubject = (classId: string, subjectId: string) => {
+    setAssignmentDraft((current) => {
+      const selected = current[classId] || []
+      return { ...current, [classId]: selected.includes(subjectId) ? selected.filter((item) => item !== subjectId) : [...selected, subjectId] }
+    })
+    setAssignmentDirty(true)
+  }
+
+  const saveAssignments = async () => {
+    const incomplete = Object.values(assignmentDraft).some((subjects) => subjects.length === 0)
+    if (!assignmentTeacher || incomplete) {
+      setMessage(incomplete ? 'प्रत्येक थपिएको कक्षामा कम्तीमा एउटा विषय छान्नुहोस् वा कक्षा हटाउनुहोस्।' : 'पहिले शिक्षक छान्नुहोस्।')
+      return
+    }
+    const assignments = Object.entries(assignmentDraft).flatMap(([classId, subjectIds]) => subjectIds.map((subjectId) => ({ class_id: Number(classId), subject_id: Number(subjectId) })))
+    setSavingAssignments(true)
+    const { error } = await createClient().rpc('save_teacher_assignments', { p_teacher_id: Number(assignmentTeacher), p_assignments: assignments })
+    setSavingAssignments(false)
+    if (error) {
+      setMessage(error.message)
+      return
+    }
+    setAssignmentDirty(false)
+    setMessage('शिक्षकको कक्षा र विषय assignment सुरक्षित भयो।')
+    await reload()
+  }
+
+  const assignedClassIds = Object.keys(assignmentDraft)
+  const availableClasses = data.classes.filter((item) => !assignedClassIds.includes(String(item.id)))
+  const selectedTeacher = data.teachers.find((item) => String(item.id) === assignmentTeacher)
+  const selectedSubjectCount = Object.values(assignmentDraft).reduce((total, subjects) => total + subjects.length, 0)
+  const hasIncompleteGrade = Object.values(assignmentDraft).some((subjects) => subjects.length === 0)
 
   return <div className="master-setup">
     {message && <p className="master-setup__message">{message}</p>}
     <div className="master-table"><h3>शिक्षक master list र report ID</h3><p>तह छान्नुहोस् र official शिक्षक ID चाहियो भने generated ID बदल्नुहोस्। ID field बाट बाहिर निस्कँदा सुरक्षित हुन्छ।</p><table><thead><tr><th>शिक्षक</th><th>पद</th><th>तह</th><th>शिक्षक ID</th></tr></thead><tbody>{data.teachers.map((teacher) => { const access = data.accessCodes.find((item) => item.teacher_id === teacher.id); return <tr key={String(teacher.id)}><td>{String(teacher.name_ne)}</td><td>{String(teacher.position_ne)}</td><td><select value={String(teacher.report_level || '')} onChange={(event) => updateTeacherLevel(teacher.id, event.target.value)}><option value="">छान्नुहोस्</option><option value="आधारभूत">आधारभूत</option><option value="माध्यमिक">माध्यमिक</option></select></td><td><input aria-label={`${teacher.name_ne} शिक्षक ID`} defaultValue={String(access?.teacher_code || '')} onBlur={(event) => updateTeacherCode(teacher.id, event.target.value)} /></td></tr> })}</tbody></table></div>
     <div className="master-table"><h3>कक्षा शिक्षक assignment</h3><p>Form 2 मा कक्षा शिक्षकले आफ्नो कक्षा मात्र देख्ने आधार यही हो।</p><table><thead><tr><th>कक्षा</th><th>तह</th><th>कक्षा शिक्षक</th></tr></thead><tbody>{data.classes.map((schoolClass) => <tr key={String(schoolClass.id)}><td>{String(schoolClass.name_ne)}</td><td>{String(schoolClass.level)}</td><td><select value={String(schoolClass.class_teacher_id || '')} onChange={(event) => updateClassTeacher(schoolClass.id, event.target.value)}><option value="">छान्नुहोस्</option>{data.teachers.map((teacher) => <option key={String(teacher.id)} value={String(teacher.id)}>{String(teacher.name_ne)}</option>)}</select></td></tr>)}</tbody></table></div>
-    <div className="master-table"><h3>कक्षा × विषय × शिक्षक assignment</h3><p>Form 1 का dropdown र expected submission count यही सूचीले चलाउँछ।</p><div className="master-assignment-add"><select aria-label="कक्षा" value={newClass} onChange={(event) => setNewClass(event.target.value)}><option value="">कक्षा</option>{data.classes.map((item) => <option key={String(item.id)} value={String(item.id)}>{String(item.name_ne)}</option>)}</select><select aria-label="विषय" value={newSubject} onChange={(event) => setNewSubject(event.target.value)}><option value="">विषय</option>{data.subjects.map((item) => <option key={String(item.id)} value={String(item.id)}>{String(item.name_ne)}</option>)}</select><select aria-label="शिक्षक" value={newTeacher} onChange={(event) => setNewTeacher(event.target.value)}><option value="">शिक्षक</option>{data.teachers.map((item) => <option key={String(item.id)} value={String(item.id)}>{String(item.name_ne)}</option>)}</select><button type="button" onClick={addAssignment}><Plus /> थप्नुहोस्</button></div><table><thead><tr><th>कक्षा</th><th>विषय</th><th>शिक्षक</th><th /></tr></thead><tbody>{data.assignments.length ? data.assignments.map((assignment) => <tr key={String(assignment.id)}><td>{className(assignment.class_id)}</td><td>{subjectName(assignment.subject_id)}</td><td>{teacherName(assignment.teacher_id)}</td><td><button className="master-delete" type="button" aria-label="Assignment हटाउनुहोस्" onClick={() => removeAssignment(assignment.id)}><Trash2 /></button></td></tr>) : <tr><td colSpan={4}>Assignment थपिएको छैन।</td></tr>}</tbody></table></div>
+    <div className="master-table assignment-editor"><h3>विषय शिक्षक assignment</h3><p>शिक्षक छान्नुहोस्, त्यस शिक्षकले पढाउने कक्षा थप्नुहोस्, र प्रत्येक कक्षाका विषयहरू छान्नुहोस्। एउटै शिक्षकका सबै परिवर्तन एकैपटक सुरक्षित हुन्छन्।</p>
+      <div className="assignment-editor__teacher">
+        <label htmlFor="assignment-teacher">१. शिक्षक छान्नुहोस्</label>
+        <select id="assignment-teacher" value={assignmentTeacher} onChange={(event) => selectAssignmentTeacher(event.target.value)}><option value="">शिक्षक छान्नुहोस्</option>{data.teachers.map((item) => <option key={String(item.id)} value={String(item.id)}>{String(item.name_ne)} — {String(item.position_ne)}</option>)}</select>
+        {selectedTeacher && <div className="assignment-editor__summary"><strong>{String(selectedTeacher.name_ne)}</strong><span>{assignedClassIds.length} कक्षा · {selectedSubjectCount} विषय assignment</span>{assignmentDirty && <em>सुरक्षित गरिएको छैन</em>}</div>}
+      </div>
+      {assignmentTeacher && <>
+        <div className="assignment-editor__add-grade"><div><label htmlFor="assignment-grade">२. अर्को कक्षा थप्नुहोस्</label><span>शिक्षकले पढाउने प्रत्येक कक्षा एकपटक थप्नुहोस्।</span></div><select id="assignment-grade" value={gradeToAdd} onChange={(event) => setGradeToAdd(event.target.value)}><option value="">कक्षा छान्नुहोस्</option>{availableClasses.map((item) => <option key={String(item.id)} value={String(item.id)}>{String(item.name_ne)} · {String(item.level)}</option>)}</select><button type="button" onClick={addGrade} disabled={!gradeToAdd}><Plus /> कक्षा थप्नुहोस्</button></div>
+        {assignedClassIds.length ? <div className="assignment-grade-grid">{assignedClassIds.map((classId) => { const schoolClass = data.classes.find((item) => String(item.id) === classId); const selectedSubjects = assignmentDraft[classId] || []; return <article className="assignment-grade-card" key={classId}><header><div><small>{String(schoolClass?.level || '')}</small><h4>{String(schoolClass?.name_ne || classId)}</h4><span>{selectedSubjects.length} विषय छानिएको</span></div><button type="button" onClick={() => removeGrade(classId)} aria-label={`${schoolClass?.name_ne || 'कक्षा'} हटाउनुहोस्`}><Trash2 /></button></header><div className="assignment-subjects"><p>३. यो कक्षाका विषय छान्नुहोस्</p>{data.subjects.map((subject) => { const subjectId = String(subject.id); const checked = selectedSubjects.includes(subjectId); return <label className={checked ? 'is-selected' : ''} key={subjectId}><input type="checkbox" checked={checked} onChange={() => toggleSubject(classId, subjectId)} /><span>{String(subject.name_ne)}</span></label> })}</div></article> })}</div> : <div className="assignment-editor__empty"><BookOpen /><strong>यस शिक्षकका लागि कक्षा थपिएको छैन</strong><span>माथिको dropdown बाट पहिलो कक्षा छान्नुहोस्।</span></div>}
+        <div className="assignment-editor__save"><div>{hasIncompleteGrade ? <span className="is-warning">विषय नछानिएको कक्षा छ।</span> : <span>{assignedClassIds.length} कक्षामा {selectedSubjectCount} assignment सुरक्षित हुनेछ।</span>}</div><button type="button" onClick={saveAssignments} disabled={!assignmentDirty || savingAssignments || hasIncompleteGrade}><Save />{savingAssignments ? 'सुरक्षित हुँदैछ…' : 'सबै परिवर्तन सुरक्षित गर्नुहोस्'}</button></div>
+      </>}
+    </div>
   </div>
 }
 
@@ -121,8 +184,8 @@ export default function ReportingDashboard() {
   const [month, setMonth] = useState('all')
   const [responseType, setResponseType] = useState<'subject' | 'class' | 'incharge'>('subject')
 
-  async function loadDashboard() {
-    setLoading(true)
+  async function loadDashboard(showLoader = true) {
+    if (showLoader) setLoading(true)
     setError('')
     const supabase = createClient()
     const metricResults = await Promise.all(metricDefinitions.map((metric) => supabase.from(metric.source).select('*').order('month_code', { ascending: false })))
@@ -130,8 +193,8 @@ export default function ReportingDashboard() {
       supabase.from('subject_monthly_reports').select('*').order('submitted_at', { ascending: false }),
       supabase.from('class_monthly_reports').select('*').order('submitted_at', { ascending: false }),
       supabase.from('incharge_monthly_reports').select('*').order('submitted_at', { ascending: false }),
-      supabase.from('teachers').select('id, name_ne, position_ne, report_level, is_academic').eq('is_academic', true).order('display_order'),
-      supabase.from('school_classes').select('id, name_ne, level, class_teacher_id').order('grade_number'),
+      supabase.from('teachers').select('id, name_ne, position_ne, report_level, is_academic').eq('is_active', true).eq('is_academic', true).order('display_order'),
+      supabase.from('school_classes').select('id, name_ne, level, class_teacher_id').eq('is_active', true).order('grade_number'),
       supabase.from('school_subjects').select('id, subject_code, name_ne').eq('is_active', true).order('id'),
       supabase.from('class_subject').select('id, class_id, subject_id, teacher_id').eq('is_active', true),
       supabase.from('teacher_report_access').select('teacher_id, teacher_code').order('teacher_id'),
@@ -144,7 +207,7 @@ export default function ReportingDashboard() {
       subjectReports: (subjectReports.data || []) as Row[], classReports: (classReports.data || []) as Row[], inchargeReports: (inchargeReports.data || []) as Row[],
       teachers: (teachers.data || []) as Row[], classes: (classes.data || []) as Row[], subjects: (subjects.data || []) as Row[], assignments: (assignments.data || []) as Row[], accessCodes: (accessCodes.data || []) as Row[],
     })
-    setLoading(false)
+    if (showLoader) setLoading(false)
   }
 
   useEffect(() => { loadDashboard() }, [])
@@ -158,13 +221,13 @@ export default function ReportingDashboard() {
   }), [data])
   const reportRows = responseType === 'subject' ? data.subjectReports : responseType === 'class' ? data.classReports : data.inchargeReports
 
-  return <div className="admin-dashboard report-dashboard"><Navigation /><header className="admin-dashboard__header"><div className="admin-dashboard__shell report-dashboard__header"><div><Link href="/admin"><ArrowLeft /> प्रशासन</Link><p><BarChart3 /> शैक्षिक अनुगमन</p><h1>मासिक प्रतिवेदन Dashboard</h1><span>आठ मुख्य KPI, मूल प्रतिवेदन र master data एउटै ठाउँमा।</span></div><div className="report-dashboard__filter"><label htmlFor="dashboard-month">महिना</label><select id="dashboard-month" value={month} onChange={(event) => setMonth(event.target.value)}><option value="all">सबै महिना</option>{months.map((item) => <option value={item} key={item}>{item}</option>)}</select><button type="button" onClick={loadDashboard}><RefreshCw /> ताजा गर्नुहोस्</button></div></div></header><main className="admin-dashboard__shell report-dashboard__content">
+  return <div className="admin-dashboard report-dashboard"><Navigation /><header className="admin-dashboard__header"><div className="admin-dashboard__shell report-dashboard__header"><div><Link href="/admin"><ArrowLeft /> प्रशासन</Link><p><BarChart3 /> शैक्षिक अनुगमन</p><h1>मासिक प्रतिवेदन Dashboard</h1><span>आठ मुख्य KPI, मूल प्रतिवेदन र master data एउटै ठाउँमा।</span></div><div className="report-dashboard__filter"><label htmlFor="dashboard-month">महिना</label><select id="dashboard-month" value={month} onChange={(event) => setMonth(event.target.value)}><option value="all">सबै महिना</option>{months.map((item) => <option value={item} key={item}>{item}</option>)}</select><button type="button" onClick={() => loadDashboard()}><RefreshCw /> ताजा गर्नुहोस्</button></div></div></header><main className="admin-dashboard__shell report-dashboard__content">
     {loading && <div className="admin-dashboard__loading"><span className="admin-dashboard__spinner" /><p>Dashboard लोड हुँदैछ…</p></div>}
     {error && <div className="report-notice report-notice--error"><div><strong>डेटा उपलब्ध भएन</strong><span>{error}</span><span>Supabase मा migration 13 लागू भएको जाँच गर्नुहोस्।</span></div></div>}
     {!loading && !error && <>
       <section><div className="admin-section-heading"><div><p>KPI views</p><h2>मुख्य मासिक सूचकहरू</h2></div><span className="report-dashboard__count">८ views</span></div><div className="metric-grid">{metricDefinitions.map((metric) => { const rows = filterRows(data.metrics[metric.key] || []); return <article className="metric-card" key={metric.key}><header><div><h3>{metric.title}</h3><p>{metric.description}</p></div><strong>{rows.length}</strong></header><div className="metric-table-wrap"><table><thead><tr>{metric.columns.map(([, label]) => <th key={label}>{label}</th>)}</tr></thead><tbody>{rows.length ? rows.slice(0, 12).map((row, index) => <tr key={index}>{metric.columns.map(([key]) => <td key={key}>{row[key] === null ? '—' : String(row[key] ?? '—')}</td>)}</tr>) : <tr><td colSpan={metric.columns.length}>डेटा छैन</td></tr>}</tbody></table></div></article> })}</div></section>
       <section className="report-dashboard__section"><div className="admin-section-heading"><div><p>Responses</p><h2>बुझाइएका प्रतिवेदन</h2></div></div><div className="response-tabs">{([['subject', 'विषय शिक्षक', data.subjectReports.length], ['class', 'कक्षा शिक्षक', data.classReports.length], ['incharge', 'तह सयोजक', data.inchargeReports.length]] as const).map(([key, label, count]) => <button type="button" className={responseType === key ? 'is-active' : ''} onClick={() => setResponseType(key)} key={key}>{label}<span>{count}</span></button>)}</div><ResponseList rows={filterRows(reportRows)} lookups={lookups} /></section>
-      <section className="report-dashboard__section"><div className="admin-section-heading"><div><p>Master data</p><h2>Fixed list तयारी</h2></div></div><div className="master-summary"><article><BookOpen /><span><strong>{data.teachers.length}</strong> शिक्षक</span></article><article><ClipboardList /><span><strong>{data.classes.length}</strong> कक्षा</span></article><article><Database /><span><strong>{data.subjects.length}</strong> विषय</span></article><article><Database /><span><strong>{data.assignments.length}</strong> class_subject assignment</span></article></div><MasterSetup data={data} reload={loadDashboard} /></section>
+      <section className="report-dashboard__section"><div className="admin-section-heading"><div><p>Master data</p><h2>Fixed list तयारी</h2></div></div><div className="master-summary"><article><BookOpen /><span><strong>{data.teachers.length}</strong> शिक्षक</span></article><article><ClipboardList /><span><strong>{data.classes.length}</strong> कक्षा</span></article><article><Database /><span><strong>{data.subjects.length}</strong> विषय</span></article><article><Database /><span><strong>{data.assignments.length}</strong> class_subject assignment</span></article></div><MasterSetup data={data} reload={() => loadDashboard(false)} /></section>
     </>}
   </main></div>
 }

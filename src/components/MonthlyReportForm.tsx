@@ -15,64 +15,6 @@ type MasterData = { teachers: Teacher[]; classes: SchoolClass[]; subjects: Subje
 
 const emptyMasters: MasterData = { teachers: [], classes: [], subjects: [], assignments: [], months: [] }
 
-function numeric(value: unknown) {
-  const number = Number(value)
-  return Number.isFinite(number) ? number : 0
-}
-
-function percent(numerator: number, denominator: number) {
-  if (!denominator) return '—'
-  return `${(numerator * 100 / denominator).toFixed(1)}%`
-}
-
-function AutoMetrics({ kind, values, assignments, classes }: { kind: ReportKind; values: Record<string, unknown>; assignments: Assignment[]; classes: SchoolClass[] }) {
-  let metrics: Array<[string, string]> = []
-
-  if (kind === 'subject') {
-    const appeared = numeric(values.exam_boys) + numeric(values.exam_girls)
-    const passed = numeric(values.passed_boys) + numeric(values.passed_girls)
-    metrics = [
-      ['कोर्ष अन्तर', `${(numeric(values.course_completed) - numeric(values.course_planned)).toFixed(1)} प्रतिशत बिन्दु`],
-      ['घण्टी डेलिभरी दर', percent(numeric(values.taught_periods), numeric(values.scheduled_periods))],
-      ['गृहकार्य पृष्ठपोषण दर', percent(numeric(values.homework_returned), numeric(values.homework_assigned))],
-    ]
-    if (values.exam_held === 'भयो') {
-      metrics.push(
-        ['सम्मिलित', String(appeared)],
-        ['उत्तीर्ण दर', percent(passed, appeared)],
-        ['औसत प्राप्तांक', percent(numeric(values.total_marks_sum), appeared * numeric(values.full_marks))],
-        ['जोखिममा', percent(numeric(values.below_pass_count), appeared)],
-      )
-    }
-  } else if (kind === 'class') {
-    const endBoys = numeric(values.start_boys) + numeric(values.new_boys) - numeric(values.left_boys)
-    const endGirls = numeric(values.start_girls) + numeric(values.new_girls) - numeric(values.left_girls)
-    const days = numeric(values.school_days)
-    metrics = [
-      ['महिनाको अन्त्य — छात्र', String(endBoys)],
-      ['महिनाको अन्त्य — छात्रा', String(endGirls)],
-      ['उपस्थिति दर — छात्र', percent(numeric(values.present_boys), endBoys * days)],
-      ['उपस्थिति दर — छात्रा', percent(numeric(values.present_girls), endGirls * days)],
-    ]
-  } else {
-    const levelClassIds = new Set(classes.filter((item) => item.level === values.level).map((item) => item.id))
-    const expected = assignments.filter((item) => levelClassIds.has(item.class_id)).length
-    metrics = [
-      ['प्राप्त हुनुपर्ने प्रतिवेदन', String(expected)],
-      ['समयमै बुझाएको दर', percent(numeric(values.on_time_reports), expected)],
-      ['वैकल्पिक व्यवस्था दर', percent(numeric(values.substituted_periods), numeric(values.vacant_periods))],
-      ['कक्षा अवलोकन', `${numeric(values.observation_count)} / न्यूनतम ८`],
-    ]
-  }
-
-  return (
-    <aside className="report-auto-panel" aria-label="स्वतः गणना">
-      <div><span>AUTO</span><strong>स्वतः गणना</strong></div>
-      <dl>{metrics.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-    </aside>
-  )
-}
-
 export function MonthlyReportForm({ kind }: { kind: ReportKind }) {
   const definition = reportDefinitions[kind]
   const [masters, setMasters] = useState<MasterData>(emptyMasters)
@@ -269,7 +211,6 @@ export function MonthlyReportForm({ kind }: { kind: ReportKind }) {
         </header>
         {submitted && <div className="report-notice report-notice--success"><CheckCircle2 /><div><strong>प्रतिवेदन सुरक्षित भयो।</strong><span>अर्को प्रतिवेदन भर्न चाहनुहुन्छ भने फारम सूचीमा फर्कनुहोस्।</span></div></div>}
         {submitError && <div className="report-notice report-notice--error"><AlertCircle /><div><strong>प्रतिवेदन सुरक्षित भएन।</strong><span>{submitError}</span></div></div>}
-        <AutoMetrics kind={kind} values={values} assignments={masters.assignments} classes={masters.classes} />
         <form className="monthly-report-form" onSubmit={handleSubmit}>
           {definition.sections.map((section) => {
             if (section.oncePerSession && values.month_code && !firstMonth) return null
